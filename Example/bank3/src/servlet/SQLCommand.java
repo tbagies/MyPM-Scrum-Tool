@@ -15,7 +15,7 @@ public class SQLCommand {
 		try
 		{
 		new com.mysql.jdbc.Driver();
-        con = DriverManager.getConnection("jdbc:mysql://localhost/banktransaction", "root", "1401");
+        con = DriverManager.getConnection("jdbc:mysql://localhost/banktransaction", "root", "");
 		}catch(SQLException e){
 			System.out.print("Fail to connect with the database");
 			System.exit(0);
