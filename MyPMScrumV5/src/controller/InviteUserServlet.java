@@ -13,6 +13,7 @@ import model.SendMail;
 
 import pmPersistence.Database;
 import domainModel.Role;
+import domainModel.User;
 
 
 /**
@@ -61,10 +62,23 @@ public class InviteUserServlet extends HttpServlet {
 				page.pageCon("Role is wrong " + roleDesc);
 			}
 			else{
+				result = myDb.retrievePersistentObjects(User.class, User.TABLE, "Email = " + Database.sanitize(userEmail));
+				if(result !=null){
+						page.pageCon("<br>This user email address already exists<br>Please use a different user email<br>");
+				}
+				else {
 				String msg = roleDesc + " Welcome to MyPmScrumTool for " + classNo + "click on the follwoing link to finish setting up your account the website"
-						+ " <a href='http://sestudio2.csctcis.cti.depaul.edu/createUserAccount.html?userEmail=" + userEmail + "'> create user account </a>";
+						+ " <a href='http://sestudio2.cstcis.cti.depaul.edu/createUserAccount.jsp?userEmail=" + userEmail + "'> create user account </a>";
 				SendMail invitation = new SendMail(userEmail,msg);
 				page.pageCon(invitation.send());
+				User user = new User(myDb);
+				user.setEmail(userEmail);
+				user.setClassName(classNo);
+				//usr.setRole(Role.getRole(myDb, roleDesc));
+				user.setAccessLevel(roleObj.getAccessLevelId());
+				myDb.storePersistentObject(user);
+				page.pageCon("<br>User succesfully registered!<br>");
+				}
 			}
 			
 		}

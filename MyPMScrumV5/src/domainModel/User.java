@@ -130,11 +130,16 @@ public class User extends PersistentObject {
 	{
 		setPersistentValue(EMAIL, email);
 	}
-	
+
 	public void setClassName(String className)
 	{
 		setPersistentValue(CLASS, className);
 	}
 	
+	// add By Taghreed for InviteUserServelt
+		public void setAccessLevel(int accessLevel)
+		{
+			setPersistentValue(ACCESS_LEVEL, accessLevel);
+		}
 
 }
