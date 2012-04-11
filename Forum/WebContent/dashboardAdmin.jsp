@@ -20,6 +20,8 @@
 		<a href="inviteUser.jsp">Invite user</a>
 		<tr><td>
 		<a href="showAllUsers.jsp">Show All Users</a>
+		<a href="showAllForums.jsp">Show All Forums</a>
+		<a href="createForum.jsp">Create a new Forum</a>
 <%
 	
 %>

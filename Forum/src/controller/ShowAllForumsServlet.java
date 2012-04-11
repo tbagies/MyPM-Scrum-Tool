@@ -44,7 +44,7 @@ public class ShowAllForumsServlet extends HttpServlet {
 			while(forumObj != null){
 				pmPersistence.RetrieveResult<User> resultUser = forumObj.getUsers();				
 				forums.append("<tr>");
-				forums.append("<td>" + forumObj.getTitle());
+				forums.append("<td><a href='showForum.jsp?forumID=" + forumObj.getForumId() + "'>" + forumObj.getTitle() + "</a>");
 				forums.append("<td>" + forumObj.getCreatedDate());
 				User userObj = resultUser.next();
 				forums.append("<td>");
@@ -52,7 +52,7 @@ public class ShowAllForumsServlet extends HttpServlet {
 					forums.append(userObj.getUserName() + "<br>");
 					userObj = resultUser.next();
 				}
-				
+				forums.append("<td><a href='deleteForum.jsp?forumID=" + forumObj.getForumId() + "'>Delete</a>");
 				forumObj = forumResult.next();
 			}
 			request.setAttribute("isEmpty", "false");
@@ -62,7 +62,7 @@ public class ShowAllForumsServlet extends HttpServlet {
 			request.setAttribute("isEmpty", "true");
 		}
 		request.setAttribute("records",forums.toString());
-		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/showForums.jsp");
+		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/showAllForums.jsp");
 		requestDispatcher.forward(request, response);
 	
 	}
