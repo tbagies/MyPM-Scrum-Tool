@@ -6,7 +6,7 @@ import pmPersistence.RetrieveResult;
 
 public class User extends PersistentObject {
 
-	public final static String TABLE = "users";
+	final static String TABLE = "users";
 	private final static String USER_ID = "UserID";
 	private final static String PROJECT_ID = "ProjectID";
 	private final static String NAME = "UserName";
@@ -15,65 +15,73 @@ public class User extends PersistentObject {
 	private final static String EMAIL = "Email";
 	private final static String CLASS = "Class";
 	
-	private UserProfile myProfile;
-	private Role myRole;
+	
+	public static RetrieveResult<User> getAll(Database db)
+	{
+		return retrievePersistentObjects(db, User.class, TABLE, null);
+	}
+	
+	public static RetrieveResult<User> findByTask(Database db, Task task)
+	{
+		return retrievePersistentObjects(db, User.class, 
+				"SELECT " + 
+				TABLE + ".* FROM " + 
+				TABLE + " INNER JOIN resources ON " +
+				TABLE + "." + USER_ID + "=resources.UserID WHERE resources.TaskID=" + 
+				task.getTaskId().toString());	
+	}
+	
+	public static RetrieveResult<User> findByForum(Database db, Forum forum)
+	{
+		return retrievePersistentObjects(db, User.class, 
+				"SELECT " + 
+				TABLE + ".* FROM " + 
+				TABLE + " INNER JOIN forummembers ON " +
+				TABLE + "." + USER_ID + "=forummembers.UserID WHERE forummembers.ForumID=" + 
+				forum.getForumId().toString());	
+	}
+	
+	public static User findById(Database db, Integer id)
+	{
+		return retrieveObjectByKey(db, User.class, TABLE, id);
+	}
 	
 	public static User findByName(Database db, String name)
 	{
-		RetrieveResult result = db.retrievePersistentObjects(User.class, TABLE, NAME + " = " + name);
-		return (User)result.next();
+		RetrieveResult<User> result = retrievePersistentObjects(db, User.class, TABLE, NAME + "=" + Database.sanitize(name));
+		return result.next();
 	}
 	
 	public static User findByEmail(Database db, String email)
 	{
-		RetrieveResult result = db.retrievePersistentObjects(User.class, TABLE, EMAIL + " = " + email);
-		return (User)result.next();
+		RetrieveResult<User> result = retrievePersistentObjects(db, User.class, TABLE, EMAIL + " = " + Database.sanitize(email));
+		return result.next();
 	}
+	
+	
 	public User(Database db) {
-		super(db.getTable(TABLE));
+		super(db, TABLE);
 
 	}
-	
+
 	public UserProfile getProfile()
 	{
-		if(myProfile == null)
-		{
-			myProfile = (UserProfile)myTable.Db.retrieveObjectByKey(UserProfile.class, UserProfile.TABLE, new Integer(getUserId()));
-		}
-		return myProfile;
+		return UserProfile.findById(getDatabase(), getUserId());
 	}
 	
-	public int getUserId()
+	public Integer getUserId()
 	{
-		Integer i =(Integer)getPersistentValue(USER_ID);
-		if(i == null)
-		{
-			return 0;
-		}
-		return i.intValue();
+		return (Integer)getPersistentValue(USER_ID);
 	}
 	
-	public int getProjectId()
+	public Project getProject()
 	{
-		Integer i =(Integer)getPersistentValue(PROJECT_ID);
-		if(i == null)
-		{
-			return 0;
-		}
-		return i.intValue();
+		return Project.findById(getDatabase(), (Integer)getPersistentValue(PROJECT_ID));
 	}
 	
 	public Role getRole()
 	{
-		if(myRole == null)
-		{
-			Integer accessLevel =(Integer)getPersistentValue(ACCESS_LEVEL);
-			if(accessLevel!=null)
-			{
-				myRole = (Role)myTable.Db.retrieveObjectByKey(Role.class, Role.TABLE, accessLevel);
-			}
-		}
-		return myRole;
+		return Role.findById(getDatabase(), (Integer)getPersistentValue(ACCESS_LEVEL));
 	}
 	
 	public String getUserName()
@@ -96,24 +104,14 @@ public class User extends PersistentObject {
 		return (String)getPersistentValue(EMAIL);
 	}
 	
-	public void setProjectId(int id)
+	public void setProject(Project project)
 	{
-		setPersistentValue(PROJECT_ID, new Integer(id));
+		setPersistentValue(PROJECT_ID, project.getProjectId());
 	}
-	/*
-	public void setRole(int accessId)
-	{
-		setRole((Role)myTable.Db.retrieveObjectByKey(Role.class, Role.TABLE, new Integer(accessId)));
-	}
-	*/
 	
 	public void setRole(Role role)
 	{
-		if(role != null)
-		{
-			myRole = role;
-			setPersistentValue(ACCESS_LEVEL, new Integer(role.getAccessLevelId()));
-		}
+		setPersistentValue(ACCESS_LEVEL, role.getAccessLevelId());
 	}
 	
 	public void setUserName(String username)
@@ -136,10 +134,150 @@ public class User extends PersistentObject {
 		setPersistentValue(CLASS, className);
 	}
 	
-	// add By Taghreed for InviteUserServelt
-		public void setAccessLevel(int accessLevel)
-		{
-			setPersistentValue(ACCESS_LEVEL, accessLevel);
-		}
+	public RetrieveResult<CustomerReport> getCustomerReports()
+	{
+		return CustomerReport.findByUser(getDatabase(), this);
+	}
+	
+	public RetrieveResult<Forum> getForums()
+	{
+		return Forum.findByUser(getDatabase(), this);
+	}
+	
+	public RetrieveResult<Post> getPosts()
+	{
+		return Post.findByUser(getDatabase(), this);
+	}
+	
+	public RetrieveResult<ScrumReport> getScrumReports()
+	{
+		return ScrumReport.findByUser(getDatabase(), this);
+	}
+	
+	public RetrieveResult<Task> getTasks()
+	{
+		return Task.findByUser(getDatabase(), this);
+	}
+	
+	public RetrieveResult<Thread> getThreads()
+	{
+		return Thread.findByUser(getDatabase(), this);
+	}
 
+	//return true if the user is assigned to the task or the user is already assigned to the task
+	public boolean assignTask(Task task)
+	{
+		boolean ret = false;
+		//can only assign a user if the task already exists in the database
+		if(!isNew)
+		{
+			//first check if the user is already assigned to the task
+			if(isTaskAssigned(task))
+			{
+				ret = true;
+			}
+			else
+			{
+				UserTaskMapping mapping = new UserTaskMapping(getDatabase());
+				mapping.setTask(task);
+				mapping.setUser(this);
+				ret = mapping.persist();
+			}
+		}
+		return ret;
+	}
+	
+	public boolean removeTask(Task task)
+	{
+		boolean ret = false;
+		if(!isNew)
+		{
+			ret = true;
+			RetrieveResult<UserTaskMapping> rs = UserTaskMapping.findByTaskAndUser(getDatabase(), task, this);
+			UserTaskMapping mapping = rs.next();
+			//there should only be one resource record per user/task pair, but just in case...
+			while(mapping != null)
+			{
+				if(!mapping.delete())
+				{
+					ret = false;
+				}
+				mapping = (UserTaskMapping)rs.next();
+			}
+		}
+		return ret;
+	}
+	
+	public boolean isTaskAssigned(Task task)
+	{
+		boolean ret = false;
+		if(!isNew)
+		{
+			if(UserTaskMapping.findByTaskAndUser(getDatabase(), task, this).next() != null)
+			{
+				ret = true;
+			}
+		}
+		return ret;
+	}
+	
+	
+	//return true if the user is assigned to the task or the user is already assigned to the task
+	public boolean assignForum(Forum forum)
+	{
+		boolean ret = false;
+		//can only assign a user if the task already exists in the database
+		if(!isNew)
+		{
+			//first check if the user is already assigned to the task
+			if(isForumAssigned(forum))
+			{
+				ret = true;
+			}
+			else
+			{
+				UserForumMapping mapping = new UserForumMapping(getDatabase());
+				mapping.setForum(forum);
+				mapping.setUser(this);
+				ret = mapping.persist();
+			}
+		}
+		return ret;
+	}
+	
+	public boolean removeForum(Forum forum)
+	{
+		boolean ret = false;
+		if(!isNew)
+		{
+			ret = true;
+			RetrieveResult<UserForumMapping> rs = UserForumMapping.findByForumAndUser(getDatabase(), forum, this);
+			UserForumMapping mapping = rs.next();
+			//there should only be one resource record per user/task pair, but just in case...
+			while(mapping != null)
+			{
+				if(!mapping.delete())
+				{
+					ret = false;
+				}
+				mapping = rs.next();
+			}
+		}
+		return ret;
+	}
+	
+	public boolean isForumAssigned(Forum forum)
+	{
+		boolean ret = false;
+		if(!isNew)
+		{
+			if(UserForumMapping.findByForumAndUser(getDatabase(), forum, this).next() != null)
+			{
+				ret = true;
+			}
+		}
+		return ret;
+	}
+		
+		
 }

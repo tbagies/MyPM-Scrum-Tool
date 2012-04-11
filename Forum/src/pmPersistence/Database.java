@@ -20,19 +20,15 @@ public class Database {
 		try {
 			Class.forName(driver).newInstance();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			myConnection = DriverManager.getConnection(url+name, user, pass);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -42,12 +38,11 @@ public class Database {
 		try {
 			myConnection.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public DBTable getTable(String name)
+	protected DBTable getTable(String name)
 	{
 		Set<String> fields = new HashSet<String>();
 		String keyField="";
@@ -76,7 +71,8 @@ public class Database {
 		return new DBTable(name, fields, keyField, this);
 	}
 
-	public void storePersistentObject(PersistentObject obj) {
+	protected <T extends PersistentObject> boolean storePersistentObject(T obj) {
+		boolean ret = true;
 		try
 		{
 			Statement st = myConnection.createStatement();
@@ -115,7 +111,8 @@ public class Database {
 					int key = rs.getInt(1);
 					String whereStmt = obj.getTable().KeyField + " = " + Integer.toString(key);
 					
-					PersistentObject obj2 = retrievePersistentObjects(obj.getClass(), obj.getTable().Name, whereStmt).next();
+					@SuppressWarnings("unchecked")
+					T obj2 = (T)retrievePersistentObjects(obj.getClass(), obj.getTable().Name, whereStmt).next();
 					
 					//if the key was auto-generated, make sure it gets updated back to the object...
 					obj.setPersistentValue(obj.getTable().KeyField, obj2.getPersistentValue(obj.getTable().KeyField));
@@ -130,8 +127,9 @@ public class Database {
 		}
 		catch(SQLException x1)
 		{
-			System.out.println("Error...!");
+			ret = false;
 		}
+		return ret;
 	}
 	
 	private String getValueString(Object obj)
@@ -145,6 +143,10 @@ public class Database {
 		{
 			ret = sanitize((String)obj);
 		}
+		else if(obj instanceof Date)
+		{
+			ret = "'"+obj.toString()+"'";
+		}
 		else
 		{
 			ret = obj.toString();
@@ -152,7 +154,7 @@ public class Database {
 		return ret;
 	}
 	
-	public Boolean deletePersistentObject(PersistentObject obj) {
+	protected Boolean deletePersistentObject(PersistentObject obj) {
 		Boolean ret = false;
 		try {
 			  Statement st = myConnection.createStatement();
@@ -195,104 +197,53 @@ public class Database {
 		return ret;
 	}
 	
-	public PersistentObject retrieveObjectByKey(@SuppressWarnings("rawtypes") Class persistentClass, String tableName, Object keyValue)
+	protected <T extends PersistentObject> T retrieveObjectByKey(Class<T> persistentClass, String tableName, Object keyValue)
 	{
-		PersistentObject ret = null;
+		T ret = null;
 		if(keyValue != null)
 		{
 			DBTable table = getTable(tableName);
 			String whereClause = table.KeyField + " = " + getValueString(keyValue);
-			RetrieveResult result = retrievePersistentObjects(persistentClass, tableName, whereClause);
+			RetrieveResult<T> result = retrievePersistentObjects(persistentClass, tableName, whereClause);
 			ret = result.next();
 		}
 		return ret;
 	}
-	public RetrieveResult retrievePersistentObjects(@SuppressWarnings("rawtypes") Class persistentClass, String tableName, String whereStmt) {
-		RetrieveResult result = null;
+	
+	protected <T extends PersistentObject> RetrieveResult<T> retrievePersistentObjects(Class<T> persistentClass, String tableName, String whereStmt) {
+		RetrieveResult<T> result = null;
 		try
 		{
 			Statement st = myConnection.createStatement();
-			ResultSet rs = st.executeQuery("SELECT * FROM "+tableName+ " WHERE " + whereStmt);
-			result = new RetrieveResult(persistentClass, rs, this);
+			ResultSet rs;
+			if(whereStmt == null)
+			{
+				rs = st.executeQuery("SELECT * FROM "+tableName);
+			}
+			else
+			{
+				rs = st.executeQuery("SELECT * FROM "+tableName+ " WHERE " + whereStmt);
+			}
+			result = new RetrieveResult<T>(persistentClass, rs, this);
 		}
 		catch (SQLException s){
+			System.out.println(s.getMessage());
 		}
 		
 		return result;
 	}
 	
-	//--------------- adding by Taghreed ------------
-	
-	public RetrieveResult retrieveAllPersistentObjects(@SuppressWarnings("rawtypes") Class persistentClass, String tableName) {
-		RetrieveResult result = null;
+	protected <T extends PersistentObject> RetrieveResult<T> retrievePersistentObjects(Class<T> persistentClass, String sqlStatement) {
+		RetrieveResult<T> result = null;
 		try
 		{
 			Statement st = myConnection.createStatement();
-			ResultSet rs = st.executeQuery("SELECT * FROM "+tableName);
-			result = new RetrieveResult(persistentClass, rs, this);
+			ResultSet rs = st.executeQuery(sqlStatement);
+			result = new RetrieveResult<T>(persistentClass, rs, this);
 		}
 		catch (SQLException s){
 		}
 		
 		return result;
-	}
-	
-	public boolean storePersistentObject1(PersistentObject obj) {
-		try
-		{
-			Statement st = myConnection.createStatement();
-			String query;
-			if(obj.isNew)
-			{
-				query = "INSERT ";
-			}
-			else
-			{
-				query = "UPDATE ";
-			}
-			query += obj.getTable().Name + " SET ";
-			Map<String, Object> properties = obj.getProperties();
-			Set<String> fields = obj.getTable().Fields;
-			boolean firstValue = true;
-			for(String fname : fields)
-			{
-				if(!firstValue)
-				{
-					query += ", ";
-				}
-				firstValue = false;
-				query += fname + "=" + getValueString(properties.get(fname));
-			}
-			if(!obj.isNew)
-			{
-				query += " WHERE " + obj.getTable().KeyField + " = " + getValueString(properties.get(obj.getTable().KeyField));
-			}
-			if(obj.isNew)
-			{
-				st.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
-				ResultSet rs = st.getGeneratedKeys();
-				if(rs.next())
-				{
-					int key = rs.getInt(1);
-					String whereStmt = obj.getTable().KeyField + " = " + Integer.toString(key);
-					
-					PersistentObject obj2 = retrievePersistentObjects(obj.getClass(), obj.getTable().Name, whereStmt).next();
-					
-					//if the key was auto-generated, make sure it gets updated back to the object...
-					obj.setPersistentValue(obj.getTable().KeyField, obj2.getPersistentValue(obj.getTable().KeyField));
-					obj.isNew = false;
-				}
-			}
-			else
-			{
-				st.executeUpdate(query);
-			}
-			
-		}
-		catch(SQLException x1)
-		{
-			return false;
-		}
-		return true;
 	}
 }

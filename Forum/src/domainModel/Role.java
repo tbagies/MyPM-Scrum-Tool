@@ -2,32 +2,39 @@ package domainModel;
 
 import pmPersistence.Database;
 import pmPersistence.PersistentObject;
+import pmPersistence.RetrieveResult;
 
 public class Role extends PersistentObject {
-	public static final String TABLE = "role";
+	static final String TABLE = "role";
 	private static final String ACCESS_LEVEL_ID = "AccessLevelID";
 	private static final String DESCRIPTION = "RoleDesc";
 	public static final Integer CUSTOMER = new Integer(1);
 	public static final Integer STUDENT = new Integer(2);
 	public static final Integer INSTRUCTOR = new Integer(3);
 	public static final Integer ADMINISTRATOR = new Integer(4);
-	public static Role getRole(Database db, Integer role)
+	
+	public static RetrieveResult<Role> getAll(Database db)
 	{
-		return (Role)db.retrieveObjectByKey(Role.class, Role.TABLE, role);
-	}
-	public Role(Database db) {
-		super(db.getTable(TABLE));
-		
+		return retrievePersistentObjects(db, Role.class, TABLE, null);
 	}
 	
-	public int getAccessLevelId()
+	public static Role findById(Database db, Integer role)
 	{
-		Integer i =(Integer)getPersistentValue(ACCESS_LEVEL_ID);
-		if(i == null)
-		{
-			return 0;
-		}
-		return i.intValue();
+		return retrieveObjectByKey(db, Role.class, Role.TABLE, role);
+	}
+	public static Role findByDescription(Database db, String description)
+	{
+		return retrievePersistentObjects(db, Role.class, TABLE, DESCRIPTION + "="+Database.sanitize(description)).next();
+	}
+	
+	public Role(Database db) {
+		super(db, TABLE);
+		
+	}
+		
+	public Integer getAccessLevelId()
+	{
+		return (Integer)getPersistentValue(ACCESS_LEVEL_ID);
 	}
 	
 	public String getDescription()

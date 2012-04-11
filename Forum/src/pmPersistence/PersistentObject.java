@@ -5,12 +5,14 @@ import java.util.Map;
 
 public class PersistentObject {
 	private Map<String, Object> myProperties;
-	protected final DBTable myTable;
+	private final DBTable myTable;
+	private final Database myDb;
 	protected boolean isNew;
-	protected PersistentObject(DBTable table)
+	protected PersistentObject(Database db, String tableName)
 	{
+		myDb = db;
+		myTable = db.getTable(tableName);
 		isNew = true;
-		myTable = table;
 		myProperties = new HashMap<String, Object>();
 		for(String s : myTable.Fields)
 		{
@@ -21,24 +23,55 @@ public class PersistentObject {
 	{
 		return myProperties;
 	}
-	DBTable getTable()
+	
+	protected static <T extends PersistentObject> T retrieveObjectByKey(Database db, Class<T> persistentClass, String tableName, Object key)
+	{
+		return db.retrieveObjectByKey(persistentClass, tableName, key);
+	}
+	
+	protected static <T extends PersistentObject> RetrieveResult<T> retrievePersistentObjects(Database db, Class<T> persistentClass, String tableName, String whereStmt) 
+	{
+		return db.retrievePersistentObjects(persistentClass, tableName, whereStmt);
+	}
+	
+	protected static <T extends PersistentObject> RetrieveResult<T> retrievePersistentObjects(Database db, Class<T> persistentClass, String sqlStmt) 
+	{
+		return db.retrievePersistentObjects(persistentClass, sqlStmt);
+	}
+	
+	protected DBTable getTable()
 	{
 		return myTable;
 	};
+	
+	protected Database getDatabase()
+	{
+		return myDb;
+	}
+	
+	public boolean persist()
+	{
+		return myDb.storePersistentObject(this);
+	}
+	
+	public boolean delete()
+	{
+		return myDb.deletePersistentObject(this);
+	}
 	
 	protected Object getPersistentValue(String key)
 	{
 		Object ret = null;
 		if(myProperties.containsKey(key))
 		{
-			ret = myProperties.get(key);;
+			ret = myProperties.get(key);
 		}
 		return ret;
 	}
 	
-	protected Boolean setPersistentValue(String key, Object obj)
+	protected boolean setPersistentValue(String key, Object obj)
 	{
-		Boolean ret = false;
+		boolean ret = false;
 		if(myProperties.containsKey(key))
 		{
 			ret = true;

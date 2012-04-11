@@ -5,15 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class RetrieveResult {
+//public class RetrieveResult {
+public class RetrieveResult<T extends PersistentObject> {
 
-	@SuppressWarnings("rawtypes")
-	private Class myClass;
+	private Class<T> myClass;
 	private ResultSet myResultSet;
 	private Database myDb;
-	@SuppressWarnings("rawtypes")
-	private Class[] myCtorArgs;
-	RetrieveResult(@SuppressWarnings("rawtypes") Class persistentClass, ResultSet rs, Database db)
+	private Class<?>[] myCtorArgs;
+	RetrieveResult(Class<T> persistentClass, ResultSet rs, Database db)
 	{
 		myDb = db;
 		myClass = persistentClass;
@@ -22,16 +21,15 @@ public class RetrieveResult {
 		myResultSet = rs;
 	}
 		
-	@SuppressWarnings("unchecked")
-	public PersistentObject next()
+	public T next()
 	{
-		PersistentObject ret = null;
+		T ret = null;
 		try
 		{
 			if(myResultSet.next())
 			{
 				try {
-					ret = (PersistentObject)myClass.getConstructor(myCtorArgs).newInstance(myDb);
+					ret = myClass.getConstructor(myCtorArgs).newInstance(myDb);
 					//initialize the object...
 					retrieveRow(ret);
 					ret.isNew = false;
@@ -49,9 +47,9 @@ public class RetrieveResult {
 		return ret;
 	}
 	
-	private void retrieveRow(PersistentObject obj)
+	private void retrieveRow(T obj)
 	{
-		Set<String> fields = obj.myTable.Fields;
+		Set<String> fields = obj.getTable().Fields;
 		for(String fname : fields)
 		{
 			obj.getProperties().put(fname, getPropertyValue(fname));

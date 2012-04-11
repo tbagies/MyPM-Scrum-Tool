@@ -2,9 +2,10 @@ package domainModel;
 
 import pmPersistence.Database;
 import pmPersistence.PersistentObject;
+import pmPersistence.RetrieveResult;
 
 public class UserProfile extends PersistentObject {
-	static public final String TABLE = "userprofile";
+	static final String TABLE = "userprofile";
 	static private final String PROFILE_ID ="ProfileID";
 	static private final String FIRST_NAME="FirstName";
 	static private final String LAST_NAME="LastName";
@@ -14,33 +15,33 @@ public class UserProfile extends PersistentObject {
 	static private final String ALT_EMAIL="AlternativeEmail";
 	static private final String TELEPHONE="Telphone";
 	
+	public static RetrieveResult<UserProfile> getAll(Database db)
+	{
+		return retrievePersistentObjects(db, UserProfile.class, TABLE, null);
+	}
+	
+	public static UserProfile findById(Database db, Integer id)
+	{
+		return (UserProfile)retrieveObjectByKey(db, UserProfile.class, TABLE, id);
+	}
+	
 	public UserProfile(Database db) {
-		super(db.getTable(TABLE));
+		super(db, TABLE);
 	}
 	
-	public int getProfileId(String userID)
+	public Integer getProfileId()
 	{
-		Integer i =(Integer)getPersistentValue(PROFILE_ID);
-		if(i == null)
-		{
-			i=0;
-		}
-		return i.intValue();
+		return (Integer)getPersistentValue(PROFILE_ID);
 	}
 	
-	public int getUserId()
+	public Integer getUserId()
 	{
-		Integer i =(Integer)getPersistentValue(USER_ID);
-		if(i == null)
-		{
-			return 0;
-		}
-		return i.intValue();
+		return (Integer)getPersistentValue(USER_ID);
 	}
 	
-	public void setUserId(int id)
+	public void setUserId(Integer id)
 	{
-		setPersistentValue(USER_ID, new Integer(id));
+		setPersistentValue(USER_ID, id);
 	}
 
 	public void setFirstName(String firstName)

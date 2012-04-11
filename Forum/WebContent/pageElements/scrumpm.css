@@ -1,0 +1,125 @@
+/* PM Scrum Tool CSS
+Change Log
+0.1 Initial release: Green theme. Still not sure if all the required elements are represented yet...
+*/
+
+body
+{
+	background-color:#eeeeee;
+}
+
+table
+{
+	margin-left:5%;
+	margin-right:5%;
+	border-collapse:collapse;
+	border: 1px solid black;
+	width:90%;
+}
+
+caption 
+{
+	caption-side:bottom;
+	color:#629852;
+}
+
+th
+{
+	border: 1px solid black;
+	background-color:#93E87D;
+}
+
+tr
+{
+	border: 1px solid black;
+	background-color:#9AE69D;
+}
+
+tr:nth-child(even)
+{
+	border: 1px solid black;
+	background-color:#9FEDAF;
+}
+
+td
+{
+	border: 1px solid black;
+}
+
+h1
+{
+	text-transform:uppercase;
+	background-color:A2F761;
+	color:#555555;
+	margin-left:5%;
+	margin-right:5%;
+}
+
+h2,h3,h4,h5,h6
+{
+	text-transform:capitalize;
+	background-color:A2F761;
+	color:#555555;
+	margin-left:5%;
+	margin-right:5%;
+}
+
+
+p
+{
+	margin-left:5%;
+	margin-right:5%;
+	background-color:#9FEDAF;
+}
+
+div
+{
+}
+
+br
+{
+	clear:left;
+}
+
+form
+{
+	/*color:#ffff00;*/
+	margin-left:5%;
+	margin-right:5%;
+	background-color:#9AE69D;
+}
+
+label
+{
+	float:left;
+	width:25%;
+	font-weight:bold;
+}
+
+input
+{
+	width:25%;
+	margin-bottom:5px;
+}
+
+textarea
+{
+	width:74%;
+	margin-bottom:5px;
+}
+
+a:link,a:visited
+{
+	display:block;
+	font-weight:bold;
+	color:#770055;
+	background-color:#93E87D;
+	margin-left:5%;
+	margin-right:5%;
+}
+
+a:hover,a:active
+{
+	background-color:#92F05D;
+}
+

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 import domainModel.User;
 
 import pmPersistence.Database;
+import pmPersistence.PersistentObject;
 
 /**
  * Servlet implementation class LoginServlet
@@ -46,8 +47,7 @@ public class LoginServlet extends HttpServlet {
 		}
 		else{
 			page.pageCon("userName: " + userName + "\npassword: " + password);
-			pmPersistence.RetrieveResult result = myDb.retrievePersistentObjects(User.class, User.TABLE, "UserName = " + Database.sanitize(userName));
-			domainModel.User userObj = (domainModel.User)result.next();
+			domainModel.User userObj = User.findByName(myDb,userName);
 			if(userObj != null)
 			{
 				page.pageCon(" User Found! ");	
@@ -59,11 +59,8 @@ public class LoginServlet extends HttpServlet {
 					{
 						page.pageCon(" Role = " + role.getDescription());
 						HttpSession session = request.getSession(true);
-						//session.setAttribute("userName", userName);
-					//	session.setAttribute("userPassword", password);
 						session.setAttribute("userID", userObj.getUserId());
 						session.setAttribute("userRole", userObj.getRole().getDescription());
-					//	session.setAttribute("AccessLevelID", role.getAccessLevelId());
 						page.pageCon("<p>You will be redirect within 2 seconds, if not happened");
 						page.pageCon("<a href='dashboardAdmin.jsp'>click here</a>");
 					}
