@@ -6,8 +6,8 @@ import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
 
-public class ScrumReport extends PersistentObject {
-	static final String TABLE = "scrumreport";
+public final class ScrumReport extends PersistentObject {
+	private static final String TABLE = "scrumreport";
 	private static final String REPORT_ID = "ReportID";
 	private static final String REPORT_DATE = "ReportDate";
 	private static final String REPORT_TITLE = "ReportTitle";
@@ -25,7 +25,7 @@ public class ScrumReport extends PersistentObject {
 	
 	public static ScrumReport findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, ScrumReport.class, TABLE, id);
+		return retrieveObjectByKey(db, ScrumReport.class, TABLE, REPORT_ID, id);
 	}
 	
 	public static RetrieveResult<ScrumReport> findByUser(Database db, User user)
@@ -40,7 +40,7 @@ public class ScrumReport extends PersistentObject {
 	
 	public ScrumReport(Database db)
 	{
-		super(db, TABLE);
+		super(db, TABLE, REPORT_ID);
 	}
 	
 	public Integer getReportId()

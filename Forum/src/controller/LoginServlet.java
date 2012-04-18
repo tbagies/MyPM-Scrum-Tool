@@ -51,7 +51,7 @@ public class LoginServlet extends HttpServlet {
 			if(userObj != null)
 			{
 				page.pageCon(" User Found! ");	
-				if(userObj.getPassword().equals(password))
+				if(userObj.getPasswordMatches(password))
 				{
 					page.pageCon(" And the password matches! ");
 					domainModel.Role role = userObj.getRole();

@@ -5,7 +5,7 @@ import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
 //class must be public so the persistence subsystem can instantiate it
-public class UserTaskMapping extends PersistentObject {
+public final class UserTaskMapping extends PersistentObject {
 	static final String TABLE="resources";
 	private static final String RESOURCE_ID = "ResourceID";
 	//package private for these fields
@@ -14,7 +14,7 @@ public class UserTaskMapping extends PersistentObject {
 	
 	//ctor must be public so the persistence subsystem can instantiate the class
 	public UserTaskMapping(Database db) {
-		super(db, TABLE);
+		super(db, TABLE, RESOURCE_ID);
 	}
 	
 	//all other methods should be package private

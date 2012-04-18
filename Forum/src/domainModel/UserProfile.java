@@ -4,8 +4,8 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class UserProfile extends PersistentObject {
-	static final String TABLE = "userprofile";
+public final class UserProfile extends PersistentObject {
+	private static final String TABLE = "userprofile";
 	static private final String PROFILE_ID ="ProfileID";
 	static private final String FIRST_NAME="FirstName";
 	static private final String LAST_NAME="LastName";
@@ -22,11 +22,11 @@ public class UserProfile extends PersistentObject {
 	
 	public static UserProfile findById(Database db, Integer id)
 	{
-		return (UserProfile)retrieveObjectByKey(db, UserProfile.class, TABLE, id);
+		return (UserProfile)retrieveObjectByKey(db, UserProfile.class, TABLE, PROFILE_ID, id);
 	}
 	
 	public UserProfile(Database db) {
-		super(db, TABLE);
+		super(db, TABLE, PROFILE_ID);
 	}
 	
 	public Integer getProfileId()

@@ -4,14 +4,15 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class UserForumMapping extends PersistentObject {
+public final class UserForumMapping extends PersistentObject {
+	//package private for table name
 	static final String TABLE="forummembers";
 	private static final String ID = "ID";
 	//package private for these fields
 	static final String USER_ID = "UserID";
 	static final String FORUM_ID = "ForumID";
 	public UserForumMapping(Database db) {
-		super(db, TABLE);
+		super(db, TABLE, ID);
 	}
 	
 	static RetrieveResult<UserForumMapping> findByForumAndUser(Database db, Forum forum, User user)

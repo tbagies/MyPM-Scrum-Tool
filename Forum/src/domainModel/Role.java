@@ -4,8 +4,8 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class Role extends PersistentObject {
-	static final String TABLE = "role";
+public final class Role extends PersistentObject {
+	private static final String TABLE = "role";
 	private static final String ACCESS_LEVEL_ID = "AccessLevelID";
 	private static final String DESCRIPTION = "RoleDesc";
 	public static final Integer CUSTOMER = new Integer(1);
@@ -20,7 +20,7 @@ public class Role extends PersistentObject {
 	
 	public static Role findById(Database db, Integer role)
 	{
-		return retrieveObjectByKey(db, Role.class, Role.TABLE, role);
+		return retrieveObjectByKey(db, Role.class, Role.TABLE, ACCESS_LEVEL_ID, role);
 	}
 	public static Role findByDescription(Database db, String description)
 	{
@@ -28,7 +28,7 @@ public class Role extends PersistentObject {
 	}
 	
 	public Role(Database db) {
-		super(db, TABLE);
+		super(db, TABLE, ACCESS_LEVEL_ID);
 		
 	}
 		

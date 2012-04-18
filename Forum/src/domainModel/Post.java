@@ -6,8 +6,8 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class Post extends PersistentObject {
-	final static String TABLE = "posts";
+public final class Post extends PersistentObject {
+	private final static String TABLE = "posts";
 	
 	private final static String POST_ID = "PostID";
 	private final static String THREAD_ID = "ThreadID";
@@ -33,12 +33,12 @@ public class Post extends PersistentObject {
 	
 	public static Post findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, Post.class, TABLE, id);
+		return retrieveObjectByKey(db, Post.class, TABLE, POST_ID, id);
 	}
 	
 	public Post(Database db)
 	{
-		super(db, TABLE);
+		super(db, TABLE, POST_ID);
 	}
 	
 	public Integer getPostId()

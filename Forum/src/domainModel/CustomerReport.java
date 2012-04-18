@@ -5,7 +5,7 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class CustomerReport extends PersistentObject {
+public final class CustomerReport extends PersistentObject {
 	private static final String TABLE = "customerreport";
 	private static final String REPORT_ID = "ReportID";
 	private static final String REPORT_DATE = "ReportDate";
@@ -24,7 +24,7 @@ public class CustomerReport extends PersistentObject {
 	
 	public static CustomerReport findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, CustomerReport.class, TABLE, id);
+		return retrieveObjectByKey(db, CustomerReport.class, TABLE, REPORT_ID, id);
 	}
 	
 	public static RetrieveResult<CustomerReport> findByUser(Database db, User user)
@@ -39,7 +39,7 @@ public class CustomerReport extends PersistentObject {
 	
 	public CustomerReport(Database db)
 	{
-		super(db, TABLE);
+		super(db, TABLE, REPORT_ID);
 	}
 	
 	public Integer getReportId()

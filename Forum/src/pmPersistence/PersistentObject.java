@@ -5,28 +5,26 @@ import java.util.Map;
 
 public class PersistentObject {
 	private Map<String, Object> myProperties;
-	private final DBTable myTable;
+	private final String myTableName;
+	private final String myKeyField;
 	private final Database myDb;
-	protected boolean isNew;
-	protected PersistentObject(Database db, String tableName)
+	private boolean myNewFlag;
+	protected PersistentObject(Database db, String tableName, String keyField)
 	{
 		myDb = db;
-		myTable = db.getTable(tableName);
-		isNew = true;
+		myTableName = tableName;
+		myKeyField = keyField;
+		myNewFlag = true;
 		myProperties = new HashMap<String, Object>();
-		for(String s : myTable.Fields)
-		{
-			myProperties.put(s, null);
-		}
 	}
 	Map<String, Object> getProperties()
 	{
 		return myProperties;
 	}
 	
-	protected static <T extends PersistentObject> T retrieveObjectByKey(Database db, Class<T> persistentClass, String tableName, Object key)
+	protected static <T extends PersistentObject> T retrieveObjectByKey(Database db, Class<T> persistentClass, String tableName, String keyField, Object key)
 	{
-		return db.retrieveObjectByKey(persistentClass, tableName, key);
+		return db.retrieveObjectByKey(persistentClass, tableName, keyField, key);
 	}
 	
 	protected static <T extends PersistentObject> RetrieveResult<T> retrievePersistentObjects(Database db, Class<T> persistentClass, String tableName, String whereStmt) 
@@ -39,11 +37,17 @@ public class PersistentObject {
 		return db.retrievePersistentObjects(persistentClass, sqlStmt);
 	}
 	
-	protected DBTable getTable()
+	protected String getTableName()
 	{
-		return myTable;
-	};
+		return myTableName;
+	}
 	
+	protected String getKeyField()
+	{
+		return myKeyField;
+	}
+	
+		
 	protected Database getDatabase()
 	{
 		return myDb;
@@ -54,6 +58,16 @@ public class PersistentObject {
 		return myDb.storePersistentObject(this);
 	}
 	
+	public boolean isNew()
+	{
+		return myNewFlag;
+	}
+	
+	void clearNewFlag()
+	{
+		myNewFlag = false;
+	}
+	
 	public boolean delete()
 	{
 		return myDb.deletePersistentObject(this);
@@ -61,22 +75,11 @@ public class PersistentObject {
 	
 	protected Object getPersistentValue(String key)
 	{
-		Object ret = null;
-		if(myProperties.containsKey(key))
-		{
-			ret = myProperties.get(key);
-		}
-		return ret;
+		return myProperties.get(key);
 	}
 	
-	protected boolean setPersistentValue(String key, Object obj)
+	protected void setPersistentValue(String key, Object obj)
 	{
-		boolean ret = false;
-		if(myProperties.containsKey(key))
-		{
-			ret = true;
-			myProperties.put(key, obj);
-		}
-		return ret;
+		myProperties.put(key, obj);
 	}
 }

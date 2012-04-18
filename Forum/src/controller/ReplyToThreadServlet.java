@@ -14,17 +14,17 @@ import domainModel.Forum;
 import domainModel.User;
 
 /**
- * Servlet implementation class PostThreadServlet
+ * Servlet implementation class ReplyToThreadServlet
  */
-@WebServlet("/PostThreadServlet")
-public class PostThreadServlet extends HttpServlet {
+@WebServlet("/ReplyToThreadServlet")
+public class ReplyToThreadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	  private static final pmPersistence.Database myDb = new pmPersistence.Database("jdbc:mysql://localhost:3306/", "com.mysql.jdbc.Driver", "mypmscrumdb", "root", "scrumPM2012");
+	private static final pmPersistence.Database myDb = new pmPersistence.Database("jdbc:mysql://localhost:3306/", "com.mysql.jdbc.Driver", "mypmscrumdb", "root", "scrumPM2012");
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public PostThreadServlet() {
+    public ReplyToThreadServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -36,29 +36,30 @@ public class PostThreadServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		response.setContentType("text/htm;charset=UTF-8");
 		String title = request.getParameter("title").trim();
-		String threadText = request.getParameter("threadText").trim();
-		String forumID = request.getParameter("forumID");
+		String threadText = request.getParameter("postText").trim();
+		String threadID = request.getParameter("threadID");
 		String userID = request.getParameter("userID");
 		RequestDispatcher dispatcher;
-		if(title == null || threadText==null || threadText.isEmpty() || forumID == null || userID == null){
+		if(title == null || threadText==null || threadText.isEmpty() || threadID == null || userID == null){
 			dispatcher = getServletContext().getRequestDispatcher("/missingFields.jsp");
 		}
 		else{
 			// insert the record in database
-			Forum forumObj = Forum.findById(myDb, Integer.parseInt(forumID));
+			domainModel.Thread threadObj = domainModel.Thread.findById(myDb, Integer.parseInt(threadID));
 			User userObj = User.findById(myDb, Integer.parseInt(userID));
+			Forum forumObj = threadObj.getForum();
 			if(userObj.isForumAssigned(forumObj)){
-				domainModel.Thread threadObj= new domainModel.Thread(myDb);
+				domainModel.Post postObj= new domainModel.Post(myDb);
 				java.util.Date today = new java.util.Date();
 				long t = today.getTime();
 				Date date = new Date(t);
-				threadObj.setDate(date);
-				threadObj.setText(threadText);
-				threadObj.setTitle(title);
-				threadObj.setUser(userObj);
-				threadObj.setForum(forumObj);
-				if(threadObj.persist())
-					dispatcher = getServletContext().getRequestDispatcher("/showForum.jsp?forumID=" + forumID);
+				postObj.setDate(date);
+				postObj.setText(threadText);
+				postObj.setTitle(title);
+				postObj.setUser(userObj);
+				postObj.setThread(threadObj);
+				if(postObj.persist())
+					dispatcher = getServletContext().getRequestDispatcher("/showThread.jsp?threadID=" + threadID);
 				else
 					dispatcher = getServletContext().getRequestDispatcher("/error.jsp");
 			}
@@ -74,7 +75,6 @@ public class PostThreadServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		doGet(request,response);
 	}
 
 }

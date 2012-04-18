@@ -1,19 +1,26 @@
 package domainModel;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Random;
+
 import pmPersistence.Database;
+import pmPersistence.MD5Hash;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
 
-public class User extends PersistentObject {
+public final class User extends PersistentObject {
 
-	final static String TABLE = "users";
+	private final static String TABLE = "users";
 	private final static String USER_ID = "UserID";
 	private final static String PROJECT_ID = "ProjectID";
 	private final static String NAME = "UserName";
-	private final static String PASSWORD = "UserPassword";
 	private final static String ACCESS_LEVEL = "AccessLevelID";
 	private final static String EMAIL = "Email";
 	private final static String CLASS = "Class";
+	private final static String PASSWORD_HASH = "PasswordHash";
+	private final static String PASSWORD_SALT = "PasswordSalt";
 	
 	
 	public static RetrieveResult<User> getAll(Database db)
@@ -24,11 +31,10 @@ public class User extends PersistentObject {
 	public static RetrieveResult<User> findByTask(Database db, Task task)
 	{
 		return retrievePersistentObjects(db, User.class, 
-				"SELECT " + 
-				TABLE + ".* FROM " + 
-				TABLE + " INNER JOIN resources ON " +
-				TABLE + "." + USER_ID + "=resources.UserID WHERE resources.TaskID=" + 
-				task.getTaskId().toString());	
+				"SELECT " + TABLE + ".* FROM " + 
+				TABLE + " INNER JOIN "+ UserTaskMapping.TABLE + " ON " +
+				TABLE + "." + USER_ID + "=" + UserTaskMapping.TABLE + "." + UserTaskMapping.USER_ID + " WHERE " +
+				UserTaskMapping.TABLE + "." + UserTaskMapping.TASK_ID + "=" + task.getTaskId().toString());	
 	}
 	
 	public static RetrieveResult<User> findByForum(Database db, Forum forum)
@@ -36,14 +42,14 @@ public class User extends PersistentObject {
 		return retrievePersistentObjects(db, User.class, 
 				"SELECT " + 
 				TABLE + ".* FROM " + 
-				TABLE + " INNER JOIN forummembers ON " +
-				TABLE + "." + USER_ID + "=forummembers.UserID WHERE forummembers.ForumID=" + 
-				forum.getForumId().toString());	
+				TABLE + " INNER JOIN " + UserForumMapping.TABLE + " ON " +
+				TABLE + "." + USER_ID + "=" + UserForumMapping.TABLE + "." + UserForumMapping.USER_ID + " WHERE " +
+				UserForumMapping.TABLE + "." + UserForumMapping.FORUM_ID + "=" + forum.getForumId().toString());	
 	}
 	
 	public static User findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, User.class, TABLE, id);
+		return retrieveObjectByKey(db, User.class, TABLE, USER_ID, id);
 	}
 	
 	public static User findByName(Database db, String name)
@@ -60,7 +66,7 @@ public class User extends PersistentObject {
 	
 	
 	public User(Database db) {
-		super(db, TABLE);
+		super(db, TABLE, USER_ID);
 
 	}
 
@@ -89,9 +95,36 @@ public class User extends PersistentObject {
 		return (String)getPersistentValue(NAME);
 	}
 	
-	public String getPassword()
+	
+	public boolean getPasswordMatches(String password)
 	{
-		return (String)getPersistentValue(PASSWORD);
+		String value = password + getSalt();
+		boolean ret = false;
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] thedigest = md.digest(value.getBytes("UTF-8"));
+			String testHash= new String();
+			for(int i = 0; i < thedigest.length; ++i)
+			{
+				testHash = testHash + String.format("%x", thedigest[i]);
+			}
+			//String testHash= new String(thedigest);
+			String realhash = (String)getPersistentValue(PASSWORD_HASH);
+			
+			if(realhash.equals(testHash))
+			{
+				ret = true;
+			}
+		} 
+		catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ret;
 	}
 	
 	public String getClassName()
@@ -119,9 +152,32 @@ public class User extends PersistentObject {
 		setPersistentValue(NAME, username);
 	}
 	
+	private String getSalt()
+	{
+		String ret = (String)getPersistentValue(PASSWORD_SALT);
+		if(ret == null)
+		{
+			//Generate a 16 byte salt
+			final String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-=_+{}[]\\|:;'\"<,>.?/";
+			char[] salt = new char[16];
+			Random rng = new Random();
+		    for (int i = 0; i < 16; i++)
+		    {
+		    	salt[i] = characters.charAt(rng.nextInt(characters.length()));
+		    }
+			ret = new String(salt);
+			
+			setPersistentValue(PASSWORD_SALT, ret);
+		}
+		return ret;
+	}
 	public void setPassword(String password)
 	{
+		/*
 		setPersistentValue(PASSWORD, password);
+		*/
+		MD5Hash md5 = new MD5Hash(password + getSalt());
+		setPersistentValue(PASSWORD_HASH, md5);
 	}
 	
 	public void setEmail(String email)
@@ -169,7 +225,7 @@ public class User extends PersistentObject {
 	{
 		boolean ret = false;
 		//can only assign a user if the task already exists in the database
-		if(!isNew)
+		if(!isNew())
 		{
 			//first check if the user is already assigned to the task
 			if(isTaskAssigned(task))
@@ -190,7 +246,7 @@ public class User extends PersistentObject {
 	public boolean removeTask(Task task)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			ret = true;
 			RetrieveResult<UserTaskMapping> rs = UserTaskMapping.findByTaskAndUser(getDatabase(), task, this);
@@ -211,7 +267,7 @@ public class User extends PersistentObject {
 	public boolean isTaskAssigned(Task task)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			if(UserTaskMapping.findByTaskAndUser(getDatabase(), task, this).next() != null)
 			{
@@ -227,7 +283,7 @@ public class User extends PersistentObject {
 	{
 		boolean ret = false;
 		//can only assign a user if the task already exists in the database
-		if(!isNew)
+		if(!isNew())
 		{
 			//first check if the user is already assigned to the task
 			if(isForumAssigned(forum))
@@ -248,7 +304,7 @@ public class User extends PersistentObject {
 	public boolean removeForum(Forum forum)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			ret = true;
 			RetrieveResult<UserForumMapping> rs = UserForumMapping.findByForumAndUser(getDatabase(), forum, this);
@@ -269,7 +325,7 @@ public class User extends PersistentObject {
 	public boolean isForumAssigned(Forum forum)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			if(UserForumMapping.findByForumAndUser(getDatabase(), forum, this).next() != null)
 			{
@@ -279,5 +335,22 @@ public class User extends PersistentObject {
 		return ret;
 	}
 		
+	public boolean delete()
+	{
+		boolean ret = super.delete();
+		if(ret)
+		{
+			//deleting a user could result in orphaned Forums.
+			//find and delete any orphaned Forums
+			RetrieveResult<Forum> orphanedForums = Forum.findOrphaned(getDatabase());
+			Forum f = orphanedForums.next();
+			while(f!=null)
+			{
+				ret = f.delete();
+				f = orphanedForums.next();
+			}
+		}
+		return ret;
 		
+	}		
 }

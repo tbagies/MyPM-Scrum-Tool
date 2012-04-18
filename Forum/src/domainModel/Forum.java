@@ -7,7 +7,7 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class Forum extends PersistentObject {
+public final class Forum extends PersistentObject {
 	private static final String TABLE = "forum";
 	private static final String FORUM_ID = "ForumID";
 	private static final String FORUM_TITLE = "ForumTitle";
@@ -20,7 +20,7 @@ public class Forum extends PersistentObject {
 	
 	public static Forum findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, Forum.class, TABLE, id);
+		return retrieveObjectByKey(db, Forum.class, TABLE, FORUM_ID, id);
 	}
 	
 	public static RetrieveResult<Forum> findByUser(Database db, User user)
@@ -33,9 +33,19 @@ public class Forum extends PersistentObject {
 				UserForumMapping.TABLE + "." + UserForumMapping.USER_ID + "=" + user.getUserId().toString());
 	}
 	
+	static RetrieveResult<Forum> findOrphaned(Database db)
+	{
+		return retrievePersistentObjects(db, Forum.class, 
+				"SELECT " + 
+				TABLE + ".* FROM " + 
+				TABLE + " LEFT JOIN "+ UserForumMapping.TABLE + " ON " +
+				TABLE + "." + FORUM_ID + "=" + UserForumMapping.TABLE + "." + UserForumMapping.FORUM_ID + " WHERE " + 
+				UserForumMapping.TABLE + "." + UserForumMapping.USER_ID + "IS NULL");
+	}
+	
 	public Forum(Database db)
 	{
-		super(db, TABLE);
+		super(db, TABLE, FORUM_ID);
 	}
 	
 	public Integer getForumId()
@@ -99,7 +109,7 @@ public class Forum extends PersistentObject {
 	{
 		boolean ret = false;
 		//can only assign a user if the task already exists in the database
-		if(!isNew)
+		if(!isNew())
 		{
 			//first check if the user is already assigned to the task
 			if(isUserAssigned(user))
@@ -120,7 +130,7 @@ public class Forum extends PersistentObject {
 	public boolean removeUser(User user)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			ret = true;
 			RetrieveResult<UserForumMapping> rs = UserForumMapping.findByForumAndUser(getDatabase(), this, user);
@@ -141,7 +151,7 @@ public class Forum extends PersistentObject {
 	public boolean isUserAssigned(User user)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			if(UserForumMapping.findByForumAndUser(getDatabase(), this, user).next() != null)
 			{

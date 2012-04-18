@@ -6,8 +6,8 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class Task  extends PersistentObject {
-	static final String TABLE = "task";
+public final class Task  extends PersistentObject {
+	private static final String TABLE = "task";
 	private static final String TASK_ID = "TaskID";
 	private static final String NAME = "name";
 	private static final String DESCRIPTION = "Description";
@@ -25,7 +25,8 @@ public class Task  extends PersistentObject {
 		return retrievePersistentObjects(db, Task.class, 
 				"SELECT " + 
 				TABLE + ".* FROM " + 
-				TABLE + " INNER JOIN " + UserTaskMapping.TABLE + " ON " +
+				TABLE + " INNER JOIN " + 
+				UserTaskMapping.TABLE + " ON " +
 				TABLE + "." + TASK_ID + "=" + UserTaskMapping.TABLE + "." + UserTaskMapping.TASK_ID + " WHERE " +
 				UserTaskMapping.TABLE + "." + UserTaskMapping.USER_ID + "=" + user.getUserId().toString());
 	}
@@ -48,12 +49,12 @@ public class Task  extends PersistentObject {
 	
 	public static Task findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, Task.class, TABLE, id);
+		return retrieveObjectByKey(db, Task.class, TABLE, TASK_ID, id);
 	}
 	
 	public Task(Database db)
 	{
-		super(db, TABLE);
+		super(db, TABLE, TASK_ID);
 	}
 	
 	public Integer getTaskId()
@@ -116,7 +117,7 @@ public class Task  extends PersistentObject {
 	{
 		boolean ret = false;
 		//can only assign a user if the task already exists in the database
-		if(!isNew)
+		if(!isNew())
 		{
 			//first check if the user is already assigned to the task
 			if(isUserAssigned(user))
@@ -137,7 +138,7 @@ public class Task  extends PersistentObject {
 	public boolean removeUser(User user)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			ret = true;
 			RetrieveResult<UserTaskMapping> rs = UserTaskMapping.findByTaskAndUser(getDatabase(), this, user);
@@ -158,7 +159,7 @@ public class Task  extends PersistentObject {
 	public boolean isUserAssigned(User user)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			if(UserTaskMapping.findByTaskAndUser(getDatabase(), this, user).next() != null)
 			{

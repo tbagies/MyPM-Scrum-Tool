@@ -8,7 +8,7 @@
 <title>show Forum</title>
 </head>
 <body>
- <%@ include file="pageElements/InstructorSession.jsp"%>
+ <%@ include file="pageElements/UserSession.jsp"%>
 <table>
 <tr><td>
 <%@ include file="pageElements/HeaderFile.html"%>
@@ -45,8 +45,10 @@ Title:
 }
 else
 {
-	RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/ShowForumServlet");
-	requestDispatcher.include(request, response);
+	if(!redirect){
+		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/ShowForumServlet");
+		requestDispatcher.include(request, response);
+	}
 }
 %>
 </center>

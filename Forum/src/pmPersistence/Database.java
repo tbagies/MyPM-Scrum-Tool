@@ -1,7 +1,6 @@
 package pmPersistence;
 
 import java.sql.*;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,35 +40,6 @@ public class Database {
 			e.printStackTrace();
 		}
 	}
-	
-	protected DBTable getTable(String name)
-	{
-		Set<String> fields = new HashSet<String>();
-		String keyField="";
-		try
-		{
-			DatabaseMetaData dbm = myConnection.getMetaData();
-			ResultSet rs = dbm.getColumns(null, "%", name, "%");
-			String colName;
-			while(rs.next()){
-				colName = rs.getString("COLUMN_NAME");
-				fields.add(colName);
-			}
-		
-			ResultSet rs2 = dbm.getPrimaryKeys(null, "%", name);
-			if(rs2.next())
-			{
-				keyField = rs2.getString("COLUMN_NAME");
-			}
-			if(rs2.next())
-			{
-				System.out.println("Error: Multiple key fields");
-			}
-		}
-		catch (SQLException s){
-		}
-		return new DBTable(name, fields, keyField, this);
-	}
 
 	protected <T extends PersistentObject> boolean storePersistentObject(T obj) {
 		boolean ret = true;
@@ -77,7 +47,7 @@ public class Database {
 		{
 			Statement st = myConnection.createStatement();
 			String query;
-			if(obj.isNew)
+			if(obj.isNew())
 			{
 				query = "INSERT ";
 			}
@@ -85,9 +55,9 @@ public class Database {
 			{
 				query = "UPDATE ";
 			}
-			query += obj.getTable().Name + " SET ";
+			query += obj.getTableName() + " SET ";
 			Map<String, Object> properties = obj.getProperties();
-			Set<String> fields = obj.getTable().Fields;
+			Set<String> fields = properties.keySet();
 			boolean firstValue = true;
 			for(String fname : fields)
 			{
@@ -98,25 +68,26 @@ public class Database {
 				firstValue = false;
 				query += fname + "=" + getValueString(properties.get(fname));
 			}
-			if(!obj.isNew)
+			if(!obj.isNew())
 			{
-				query += " WHERE " + obj.getTable().KeyField + " = " + getValueString(properties.get(obj.getTable().KeyField));
+				query += " WHERE " + obj.getKeyField() + " = " + getValueString(properties.get(obj.getKeyField()));
 			}
-			if(obj.isNew)
+			if(obj.isNew())
 			{
 				st.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
 				ResultSet rs = st.getGeneratedKeys();
 				if(rs.next())
 				{
 					int key = rs.getInt(1);
-					String whereStmt = obj.getTable().KeyField + " = " + Integer.toString(key);
+					String whereStmt = obj.getKeyField() + " = " + Integer.toString(key);
+					
 					
 					@SuppressWarnings("unchecked")
-					T obj2 = (T)retrievePersistentObjects(obj.getClass(), obj.getTable().Name, whereStmt).next();
+					T obj2 = (T)retrievePersistentObjects(obj.getClass(), obj.getTableName(), whereStmt).next();
 					
 					//if the key was auto-generated, make sure it gets updated back to the object...
-					obj.setPersistentValue(obj.getTable().KeyField, obj2.getPersistentValue(obj.getTable().KeyField));
-					obj.isNew = false;
+					obj.setPersistentValue(obj.getKeyField(), obj2.getPersistentValue(obj.getKeyField()));
+					obj.clearNewFlag();
 				}
 			}
 			else
@@ -127,6 +98,7 @@ public class Database {
 		}
 		catch(SQLException x1)
 		{
+			System.out.println(x1.getMessage());
 			ret = false;
 		}
 		return ret;
@@ -158,7 +130,9 @@ public class Database {
 		Boolean ret = false;
 		try {
 			  Statement st = myConnection.createStatement();
-			  String query = "DELETE FROM " + obj.getTable().Name + " WHERE " + obj.getTable().KeyField + " = " + getValueString(obj.getProperties().get(obj.getTable().KeyField));
+			  String query = "DELETE FROM " + obj.getTableName() + 
+					  " WHERE " + obj.getKeyField() + " = " + 
+					  getValueString(obj.getProperties().get(obj.getKeyField()));
 			  int delete = st.executeUpdate(query);
 			  if(delete == 1){
 				  ret = true;
@@ -175,7 +149,7 @@ public class Database {
 		//replace any \ with a \\
 		rawData.replace("\\","\\\\");
 		//replace any ' with a \'
-		rawData.replace("'","\\'");
+		rawData.replace("\'","\\\'");
 		//replace any " with a \"
 		rawData.replace("\"", "\\\"");
 		//encapsulate in ''
@@ -197,13 +171,12 @@ public class Database {
 		return ret;
 	}
 	
-	protected <T extends PersistentObject> T retrieveObjectByKey(Class<T> persistentClass, String tableName, Object keyValue)
+	protected <T extends PersistentObject> T retrieveObjectByKey(Class<T> persistentClass, String tableName, String keyField, Object keyValue)
 	{
 		T ret = null;
 		if(keyValue != null)
 		{
-			DBTable table = getTable(tableName);
-			String whereClause = table.KeyField + " = " + getValueString(keyValue);
+			String whereClause = keyField + " = " + getValueString(keyValue);
 			RetrieveResult<T> result = retrievePersistentObjects(persistentClass, tableName, whereClause);
 			ret = result.next();
 		}

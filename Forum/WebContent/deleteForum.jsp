@@ -4,8 +4,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Delete Forum</title>
 </head>
+ <%@ include file="pageElements/InstructorSession.jsp"%>
 <body>
 <%
 if(request.getAttribute("isDeleted") != null){
@@ -17,8 +18,10 @@ if(request.getAttribute("isDeleted") != null){
 }
 else
 {
-	RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/DeleteForumServlet");
-	requestDispatcher.include(request, response);
+	if(!redirect){
+		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/DeleteForumServlet");
+		requestDispatcher.include(request, response);
+	}
 }
 %>
 </body>

@@ -6,8 +6,8 @@ import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
 
-public class Thread  extends PersistentObject {
-	static final String TABLE = "thread";
+public final class Thread  extends PersistentObject {
+	private static final String TABLE = "thread";
 	private static final String THREAD_ID = "ThreadID";
 	private static final String THREAD_TITLE = "ThreadTitle";
 	private static final String THREAD_TEXT = "ThreadText";
@@ -32,12 +32,12 @@ public class Thread  extends PersistentObject {
 	
 	public static Thread findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, Thread.class, TABLE, id);
+		return retrieveObjectByKey(db, Thread.class, TABLE, THREAD_ID, id);
 	}
 	
 	public Thread(Database db)
 	{
-		super(db, TABLE);
+		super(db, TABLE, THREAD_ID);
 	}
 	
 	public Integer getThreadId()

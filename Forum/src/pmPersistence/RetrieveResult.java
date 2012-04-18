@@ -2,10 +2,10 @@ package pmPersistence;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Set;
 
-//public class RetrieveResult {
+
 public class RetrieveResult<T extends PersistentObject> {
 
 	private Class<T> myClass;
@@ -32,7 +32,7 @@ public class RetrieveResult<T extends PersistentObject> {
 					ret = myClass.getConstructor(myCtorArgs).newInstance(myDb);
 					//initialize the object...
 					retrieveRow(ret);
-					ret.isNew = false;
+					ret.clearNewFlag();
 				}
 				catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException s)
 				{
@@ -49,10 +49,20 @@ public class RetrieveResult<T extends PersistentObject> {
 	
 	private void retrieveRow(T obj)
 	{
-		Set<String> fields = obj.getTable().Fields;
-		for(String fname : fields)
+		ResultSetMetaData meta;
+		try 
 		{
-			obj.getProperties().put(fname, getPropertyValue(fname));
+			meta = myResultSet.getMetaData();
+			int columns = meta.getColumnCount();
+			for(int column = 1; column <= columns; ++column)
+			{
+				String fname = meta.getColumnName(column);
+				obj.getProperties().put(fname, getPropertyValue(fname));
+			}
+		} 
+		catch (SQLException e) 
+		{
+			e.printStackTrace();
 		}
 	}
 	
