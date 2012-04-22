@@ -14,8 +14,8 @@ pmPersistence.Database myDb = new pmPersistence.Database("jdbc:mysql://localhost
 User userSession = User.findById(myDb, userID);
 boolean redirect =false;
 if(userSession==null){
-	response.sendRedirect("login.jsp");
 	redirect = true;
+	response.sendRedirect("login.jsp");
 }
 	
 	//out.print("<META HTTP-EQUIV='refresh' CONTENT='0;URL=login.jsp'>");

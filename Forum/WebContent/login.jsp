@@ -1,4 +1,4 @@
-<%@ page import="model.PMSession"%>
+<%@ page import="domainModel.User"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -9,17 +9,22 @@
 <table>
 <tr><td colspan=2> <%@ include file="pageElements/HeaderFile.html"%>
 	<tr><td>
-	<%@ include file="pageElements/LeftMenuFile.jsp"%>
-			
+	<%@ include file="pageElements/LeftMenuFile.jsp"%>	
 	<td>	
 
 <table>
 <tr><td> 
 <%
 Integer userID = (Integer) session.getAttribute("userID");
-model.PMSession pmSession = new PMSession(userID);
-if(!pmSession.isSession()){
-	out.println("<tr><td colspan=2 align=center> Please enter your username and password:");
+pmPersistence.Database myDb = new pmPersistence.Database("jdbc:mysql://localhost:3306/", "com.mysql.jdbc.Driver", "mypmscrumdb", "root", "scrumPM2012");
+User userSession = User.findById(myDb, userID);
+boolean redirect =false;
+if(userSession==null){
+	out.print("<tr><td colspan=2 align=center>");
+	if(request.getParameter("msg")==null)
+		out.println("Please enter your username and password:");
+	else
+		out.println(request.getParameter("msg"));
 	%>
 	<form action="LoginServlet" method="get">
 	<tr><td>
@@ -33,15 +38,18 @@ User Name:
 <input type="reset" value="reset">
 </form>
 	<%
-}
+	}
 	
-else{
-	out.println("Welcome back " + session.getAttribute("userName"));
+else
+{
+	out.println("Welcome back " + userSession.getUserName());
+	response.sendRedirect("dashboardAdmin.jsp");
+	}
 %>
-<p>You will be redirect within 2 seconds, if not happened
+<!-- <p>You will be redirect within 2 seconds, if not happened
 <a href='dashboardAdmin.jsp'>click here</a>						
 <META HTTP-EQUIV="refresh" CONTENT="1;URL=index.jsp">
-<% } %>
+-->
 </table>
 
 

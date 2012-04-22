@@ -19,15 +19,6 @@
 <tr><td>
 <center>
 <% 
-/** if(request.getAttribute("isEmpty") != null){
-	if(request.getAttribute("isEmpty") == "true")
-		out.println("No users registered");
-	else{
-		out.println(request.getAttribute("records"));
-	}
-}
-else
-*/
 	if(userSession!=null){
 		String forums = ShowAllForums.showForums(userSession);
 		out.println(forums);

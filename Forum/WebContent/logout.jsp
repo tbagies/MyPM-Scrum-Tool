@@ -8,9 +8,8 @@
 </head>
 <body>
 <%
-session.setAttribute("userName", null);
-session.setAttribute("userPassword", null);
+session.setAttribute("userID", null);
 %>
-<META HTTP-EQUIV="refresh" CONTENT="1;URL=index.html">
+<META HTTP-EQUIV="refresh" CONTENT="1;URL=index.jsp">
 </body>
 </html>
