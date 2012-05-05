@@ -22,12 +22,12 @@ public class Project extends PersistentObject {
 	
 	public static Project findById(Database db, Integer id)
 	{
-		return retrieveObjectByKey(db, Project.class, TABLE, id);
+		return retrieveObjectByKey(db, Project.class, TABLE, PROJECT_ID, id);
 	}
 	
 	public Project(Database db)
 	{
-		super(db, TABLE);
+		super(db, TABLE, PROJECT_ID);
 	}
 	
 	public Integer getProjectId()
@@ -115,7 +115,7 @@ public class Project extends PersistentObject {
 	{
 		boolean ret = false;
 		//can only assign a user if the task already exists in the database
-		if(!isNew)
+		if(!isNew())
 		{
 			//first check if the user is already assigned to the task
 			if(isUserAssigned(user))
@@ -136,7 +136,7 @@ public class Project extends PersistentObject {
 	public boolean removeUser(User user)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			ret = true;
 			RetrieveResult<UserProjectMapping> rs = UserProjectMapping.findByProjectAndUser(getDatabase(), this, user);
@@ -157,7 +157,7 @@ public class Project extends PersistentObject {
 	public boolean isUserAssigned(User user)
 	{
 		boolean ret = false;
-		if(!isNew)
+		if(!isNew())
 		{
 			if(UserProjectMapping.findByProjectAndUser(getDatabase(), this, user).next() != null)
 			{

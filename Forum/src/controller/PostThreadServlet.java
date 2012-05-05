@@ -40,8 +40,9 @@ public class PostThreadServlet extends HttpServlet {
 		String forumID = request.getParameter("forumID");
 		String userID = request.getParameter("userID");
 		RequestDispatcher dispatcher;
+		String fileName="/error.jsp";
 		if(title == null || threadText==null || threadText.isEmpty() || forumID == null || userID == null){
-			dispatcher = getServletContext().getRequestDispatcher("/missingFields.jsp");
+			fileName= fileName + "?msg=All Fields are required";
 		}
 		else{
 			// insert the record in database
@@ -58,14 +59,13 @@ public class PostThreadServlet extends HttpServlet {
 				threadObj.setUser(userObj);
 				threadObj.setForum(forumObj);
 				if(threadObj.persist())
-					dispatcher = getServletContext().getRequestDispatcher("/showForum.jsp?forumID=" + forumID);
-				else
-					dispatcher = getServletContext().getRequestDispatcher("/error.jsp");
+					fileName ="/showForum.jsp?forumID=" + forumID;
 			}
 			else
-				dispatcher = getServletContext().getRequestDispatcher("/unPermission.jsp");
+				fileName= fileName + "?msg=not allowed";
 
 		}
+		dispatcher = getServletContext().getRequestDispatcher(fileName);
         dispatcher.forward(request, response);
 	}
 

@@ -40,51 +40,48 @@ public class LoginServlet extends HttpServlet {
 		String userName = request.getParameter("userName");
 		String password = request.getParameter("password");
 		String fileName="/error.jsp";
-		DesignPage page= new DesignPage();
+		String msg="";
 		if((userName == null) || userName.isEmpty() || (password == null) || password.isEmpty()){
-			fileName="/login.jsp?msg='user name and password must be entered'";
+			fileName="/login.jsp";
+			msg="user name and password must be entered";
 		}
 		else if(userName.length()>45 || password.length()>10){
-			fileName="/login.jsp?msg='user name and password are wrong'";
+			fileName="/login.jsp";
+			msg="user name and password are wrong";
 		}
 		else{
-			//page.pageCon("userName: " + userName + "\npassword: " + password);
 			domainModel.User userObj = User.findByName(myDb,userName);
 			if(userObj != null)
 			{
-		//		page.pageCon(" User Found! ");	
 				if(userObj.getPasswordMatches(password))
 				{
-				//	page.pageCon(" And the password matches! ");
 					domainModel.Role role = userObj.getRole();
 					if(role != null)
 					{
-				//		page.pageCon(" Role = " + role.getDescription());
 						HttpSession session = request.getSession(true);
 						session.setAttribute("userID", userObj.getUserId());
 						session.setAttribute("userRole", userObj.getRole().getDescription());
 						fileName= "/dashboardAdmin.jsp";
-				//		page.pageCon("<p>You will be redirect within 2 seconds, if not happened");
-					//	page.pageCon("<a href='dashboardAdmin.jsp'>click here</a>");
-					}
+						}
 					else
 					{
-						fileName="/login.jsp?msg='Unknown Role'";
-						
+						fileName="/login.jsp";
+						msg="Unknown Role";	
 					}
 				}
 				else
 				{
-					fileName="/login.jsp?msg='the password does not match'";
-				
+					fileName="/login.jsp";
+					msg="The password does not match";
 				}
 			}
 			else
 			{
-				fileName="/login.jsp?msg='user Not Found'";
-				
+				fileName="/login.jsp";
+				msg="User Not Found";	
 			}
 		}
+		request.setAttribute("msg", msg);
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(fileName);
 	    dispatcher.forward(request, response);
 	}

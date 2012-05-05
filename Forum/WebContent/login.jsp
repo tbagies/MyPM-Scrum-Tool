@@ -21,10 +21,10 @@ User userSession = User.findById(myDb, userID);
 boolean redirect =false;
 if(userSession==null){
 	out.print("<tr><td colspan=2 align=center>");
-	if(request.getParameter("msg")==null)
+	if(request.getAttribute("msg")==null)
 		out.println("Please enter your username and password:");
 	else
-		out.println(request.getParameter("msg"));
+		out.println(request.getAttribute("msg"));
 	%>
 	<form action="LoginServlet" method="get">
 	<tr><td>

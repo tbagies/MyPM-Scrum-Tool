@@ -11,7 +11,7 @@ public class UserProjectMapping extends PersistentObject {
 	static final String USER_ID = "UserID";
 	static final String PROJECT_ID = "ProjectID";
 	public UserProjectMapping(Database db) {
-		super(db, TABLE);
+		super(db, TABLE, ID);
 	}
 	
 	static RetrieveResult<UserProjectMapping> findByProjectAndUser(Database db, Project project, User user)

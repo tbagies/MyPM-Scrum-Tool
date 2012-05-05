@@ -40,8 +40,9 @@ public class ReplyToThreadServlet extends HttpServlet {
 		String threadID = request.getParameter("threadID");
 		String userID = request.getParameter("userID");
 		RequestDispatcher dispatcher;
+		String fileName="/error.jsp";
 		if(title == null || threadText==null || threadText.isEmpty() || threadID == null || userID == null){
-			dispatcher = getServletContext().getRequestDispatcher("/missingFields.jsp");
+			fileName = fileName + "?msg=All field are required";
 		}
 		else{
 			// insert the record in database
@@ -59,14 +60,14 @@ public class ReplyToThreadServlet extends HttpServlet {
 				postObj.setUser(userObj);
 				postObj.setThread(threadObj);
 				if(postObj.persist())
-					dispatcher = getServletContext().getRequestDispatcher("/showThread.jsp?threadID=" + threadID);
-				else
-					dispatcher = getServletContext().getRequestDispatcher("/error.jsp");
+					fileName = "/showThread.jsp?threadID=" + threadID;
+	
 			}
 			else
-				dispatcher = getServletContext().getRequestDispatcher("/unPermission.jsp");
+				fileName = fileName + "?msg=Not allowed";
 
 		}
+		dispatcher = getServletContext().getRequestDispatcher(fileName);
         dispatcher.forward(request, response);
 	}
 

@@ -41,19 +41,18 @@ public class ShowThreadServlet extends HttpServlet {
 			pmPersistence.RetrieveResult<domainModel.Post> postResult = domainModel.Post.findByThread(myDb, threadObj);
 			domainModel.Post postObj = postResult.next();
 			StringBuilder posts = new StringBuilder("");
-			posts.append("<table><tr><td>title<td>post<td>Created date<td>author");
-			posts.append("<tr>");
-			posts.append("<td>" + threadObj.getTitle());
-			posts.append("<td>" + threadObj.getText());
-			posts.append("<td>" + threadObj.getDate());
-			posts.append("<td>" + threadObj.getUser().getUserName());
+			posts.append("<table>");
+		//	posts.append("<tr>");
+		//	posts.append("<td>" + threadObj.getTitle());
+		//	posts.append("<td>" + threadObj.getText());
+		///	posts.append("<td>" + threadObj.getDate());
+		//	posts.append("<td>" + threadObj.getUser().getUserName());
 			if(postObj!=null){
 				while(postObj != null){		
-					posts.append("<tr>");
-					posts.append("<td>" + postObj.getTitle());
-					posts.append("<td>" + postObj.getText());
-					posts.append("<td>" + postObj.getDate());
-					posts.append("<td>" + postObj.getUser().getUserName());
+					posts.append("<tr><td colspan=2>");
+					posts.append("<h2>" + postObj.getTitle() + "</h2>");
+					posts.append("<tr ><td colspan=2><p>" + postObj.getText() + "</p>");
+					posts.append("<tr><td><h3>" + "Created by" + postObj.getUser().getUserName() + "<td>" + postObj.getDate() + "</h3>");
 					postObj = postResult.next();
 				}
 				

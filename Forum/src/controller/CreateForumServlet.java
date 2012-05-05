@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.sql.Date;
 import java.util.ArrayList;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import domainModel.Forum;
+import domainModel.Task;
 
 /**
  * Servlet implementation class CreateForumServlet
@@ -40,10 +42,10 @@ public class CreateForumServlet extends HttpServlet {
 		String forumName = request.getParameter("forumName");
 		String memberNo = request.getParameter("i");
 		ArrayList<Integer> membersID = new ArrayList<Integer>();
-		DesignPage page= new DesignPage();
-
+	//	DesignPage page= new DesignPage();
+		String fileName="/error.jsp";
 		if(memberNo==null || memberNo.isEmpty())
-			page.pageCon("choose member name" + request.getParameter("i"));
+			fileName="error.jsp?msg=choose member name";
 		else{
 			int j = Integer.parseInt(memberNo);
 			for(int i=1; i<j;  i++){
@@ -52,12 +54,11 @@ public class CreateForumServlet extends HttpServlet {
 					membersID.add(Integer.parseInt(memberName));
 			}
 		}
-		page.pageCon(membersID.toString());
 		if((forumName == null) || forumName.isEmpty()){
-			page.pageCon("Forum name must be entered");
+			fileName= fileName + "?msg=Forum name must be entered";
 		}
 		else if(forumName.length()>45){
-			page.pageCon("forum name are wrong");
+			fileName= fileName + "?msg=forum name are wrong";
 		}
 		else{
 			Forum forumObj = new Forum(myDb);
@@ -65,21 +66,21 @@ public class CreateForumServlet extends HttpServlet {
 			long t = today.getTime();
 			Date date = new Date(t);
 			forumObj.setCreatedDate(date);
-			forumObj.setTitle(forumName);
-			
+			forumObj.setTitle(forumName);				
 			if(forumObj.persist()){
 				if(forumObj.addUsersById(membersID))
-					page.pageCon("forum has been created");
+					fileName="/showAllForums.jsp";
 				else{
-					page.pageCon("Error,,, Forum is not created because of Forum Members table");
+					fileName = fileName + "?msg=Error,,, Forum is not created because of Forum Members table";
 					if(!forumObj.delete())
-						page.pageCon("Error,,, Forum is not deleted");
+						fileName= fileName + "?msg=Error,,, Forum is not deleted";
 				}
 			}
 			else
-				page.pageCon("Error,,, forum is not  created");
+				fileName= fileName + "?msg=Error,,, forum is not  created";
 		}
-		out.print(page.getPage());
+		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(fileName);
+	    dispatcher.forward(request, response);
 	}
 
 	/**
