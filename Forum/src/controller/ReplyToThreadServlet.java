@@ -41,8 +41,9 @@ public class ReplyToThreadServlet extends HttpServlet {
 		String userID = request.getParameter("userID");
 		RequestDispatcher dispatcher;
 		String fileName="/error.jsp";
+		String msg="";
 		if(title == null || threadText==null || threadText.isEmpty() || threadID == null || userID == null){
-			fileName = fileName + "?msg=All field are required";
+			msg= "All field are required";
 		}
 		else{
 			// insert the record in database
@@ -61,12 +62,11 @@ public class ReplyToThreadServlet extends HttpServlet {
 				postObj.setThread(threadObj);
 				if(postObj.persist())
 					fileName = "/showThread.jsp?threadID=" + threadID;
-	
 			}
 			else
-				fileName = fileName + "?msg=Not allowed";
-
+				msg= "Not allowed";
 		}
+		request.setAttribute("msg", msg);
 		dispatcher = getServletContext().getRequestDispatcher(fileName);
         dispatcher.forward(request, response);
 	}

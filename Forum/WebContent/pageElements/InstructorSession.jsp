@@ -12,7 +12,7 @@
 <%
 if(userSession!=null)
 	if(! (userSession.getRole().getAccessLevelId().equals(Role.INSTRUCTOR))){	
-	response.sendRedirect("unPermission.jsp");
+	response.sendRedirect("error.jsp");
 	redirect = true;
 }
 %>

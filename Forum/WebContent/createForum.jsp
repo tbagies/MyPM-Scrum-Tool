@@ -1,4 +1,4 @@
-<%@ page import="domainModel.User"%>
+<%@ page import="domainModel.Project"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -25,21 +25,20 @@
 <td>
 
 <%
-pmPersistence.RetrieveResult<User> result = User.getAll( new pmPersistence.Database("jdbc:mysql://localhost:3306/", "com.mysql.jdbc.Driver", "mypmscrumdb", "root", "scrumPM2012"));
-domainModel.User userObj = result.next();
-if(userObj==null){
+pmPersistence.RetrieveResult<Project> result = Project.getAll( new pmPersistence.Database("jdbc:mysql://localhost:3306/", "com.mysql.jdbc.Driver", "mypmscrumdb", "root", "scrumPM2012"));
+domainModel.Project projectObj = result.next();
+if(projectObj==null){
 	out.println("There is no student registred in the system");
 }
 else{
-	int i=1;
-	while(userObj!=null){
-		out.println("<input type='checkbox' name='membersName" + i + "' value='" + userObj.getUserId() + "'>" +  userObj.getUserName() + "<br>");
-		userObj = result.next();
-		i++;
+	out.println("<select name='projectID'>");
+	while(projectObj!=null){
+		out.println("<option value='" + projectObj.getName() + "'>" + projectObj.getName());
+		projectObj = result.next();
+		out.println("</option>");
 	}
-	%>
-	<input type="hidden" name="i" value=<%=i %>>
-	<%
+	out.println("</select>");
+
 }
 %>
 <tr><td colspan=2>

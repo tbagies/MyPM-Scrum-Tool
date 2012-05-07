@@ -43,7 +43,7 @@ User Name:
 else
 {
 	out.println("Welcome back " + userSession.getUserName());
-	response.sendRedirect("dashboardAdmin.jsp");
+	response.sendRedirect("dashboard.jsp");
 	}
 %>
 <!-- <p>You will be redirect within 2 seconds, if not happened

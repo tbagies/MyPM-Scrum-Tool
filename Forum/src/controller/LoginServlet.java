@@ -61,7 +61,7 @@ public class LoginServlet extends HttpServlet {
 						HttpSession session = request.getSession(true);
 						session.setAttribute("userID", userObj.getUserId());
 						session.setAttribute("userRole", userObj.getRole().getDescription());
-						fileName= "/dashboardAdmin.jsp";
+						fileName= "/dashboard.jsp";
 						}
 					else
 					{

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import domainModel.Forum;
+import domainModel.Project;
 import domainModel.Task;
 
 /**
@@ -37,47 +38,31 @@ public class CreateForumServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		response.setContentType("text/htm;charset=UTF-8");
-        PrintWriter out = response.getWriter();
 		String forumName = request.getParameter("forumName");
-		String memberNo = request.getParameter("i");
-		ArrayList<Integer> membersID = new ArrayList<Integer>();
-	//	DesignPage page= new DesignPage();
+		String projectID = request.getParameter("projectID");
+	//	String memberNo = request.getParameter("i");
+	//	ArrayList<Integer> membersID = new ArrayList<Integer>();
 		String fileName="/error.jsp";
-		if(memberNo==null || memberNo.isEmpty())
-			fileName="error.jsp?msg=choose member name";
-		else{
-			int j = Integer.parseInt(memberNo);
-			for(int i=1; i<j;  i++){
-				String memberName = request.getParameter("membersName" + i);
-				if(memberName!=null)
-					membersID.add(Integer.parseInt(memberName));
-			}
-		}
-		if((forumName == null) || forumName.isEmpty()){
-			fileName= fileName + "?msg=Forum name must be entered";
-		}
-		else if(forumName.length()>45){
+		if(projectID==null || projectID.isEmpty() || forumName == null || forumName.isEmpty())
+			fileName="error.jsp?msg=all fields are required";		
+		else 
+			if(forumName.length()>45){
 			fileName= fileName + "?msg=forum name are wrong";
 		}
-		else{
-			Forum forumObj = new Forum(myDb);
-			java.util.Date today = new java.util.Date();
-			long t = today.getTime();
-			Date date = new Date(t);
-			forumObj.setCreatedDate(date);
-			forumObj.setTitle(forumName);				
-			if(forumObj.persist()){
-				if(forumObj.addUsersById(membersID))
+			else{
+				Forum forumObj = new Forum(myDb);
+				java.util.Date today = new java.util.Date();
+				long t = today.getTime();
+				Date date = new Date(t);
+				forumObj.setCreatedDate(date);
+				forumObj.setTitle(forumName);	
+				Project projectObj = Project.findById(myDb, Integer.parseInt(projectID));
+				forumObj.setProject(projectObj);
+				if(forumObj.persist()){
 					fileName="/showAllForums.jsp";
-				else{
-					fileName = fileName + "?msg=Error,,, Forum is not created because of Forum Members table";
-					if(!forumObj.delete())
-						fileName= fileName + "?msg=Error,,, Forum is not deleted";
 				}
-			}
-			else
-				fileName= fileName + "?msg=Error,,, forum is not  created";
+				else
+					fileName= fileName + "?msg=Error,,, forum is not  created";
 		}
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(fileName);
 	    dispatcher.forward(request, response);

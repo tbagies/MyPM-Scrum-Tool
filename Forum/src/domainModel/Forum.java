@@ -160,5 +160,4 @@ public final class Forum extends PersistentObject {
 		}
 		return ret;
 	}
-
 }
