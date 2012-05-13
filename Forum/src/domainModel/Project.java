@@ -1,7 +1,7 @@
 package domainModel;
 
 import java.sql.Date;
-import java.util.List;
+
 
 import pmPersistence.Database;
 import pmPersistence.PersistentObject;
@@ -14,6 +14,7 @@ public class Project extends PersistentObject {
 	private static final String PROJECT_DESCRIPTION = "projectDescription";
 	private static final String PROJECT_CREATED_DATE = "ProjectCreatedDate";
 	private static final String PROJECT_DUE_DATE = "ProjectdueDate";
+	private static final String LAST_UPDATED_DATE = "LastUpdatedDate";
 	
 	public static RetrieveResult<Project> getAll(Database db)
 	{
@@ -87,84 +88,20 @@ public class Project extends PersistentObject {
 	{
 		return null;
 	}
-//
-//
-//
-	public boolean addUsersById(List<Integer> userIds)
+	
+	public RetrieveResult<Forum> getForums()
 	{
-		boolean ret = true;
-		for(Integer id : userIds)
-		{
-			User user = User.findById(getDatabase(), id);
-			if(user != null)
-			{
-				if(!addUser(user))
-				{
-					ret = false;
-				}
-			}
-			else
-			{
-				ret = false;
-			}
-		}
-		return ret;
-	}
-	//return true if the user is assigned to the task or the user is already assigned to the task
-	public boolean addUser(User user)
-	{
-		boolean ret = false;
-		//can only assign a user if the task already exists in the database
-		if(!isNew())
-		{
-			//first check if the user is already assigned to the task
-			if(isUserAssigned(user))
-			{
-				ret = true;
-			}
-			else
-			{
-				UserProjectMapping mapping = new UserProjectMapping(getDatabase());
-				mapping.setProject(this);
-				mapping.setUser(user);
-				ret = mapping.persist();
-			}
-		}
-		return ret;
+		return Forum.findByProject(getDatabase(), this);
 	}
 	
-	public boolean removeUser(User user)
+	public void setLastUpdatedDate(Date date)
 	{
-		boolean ret = false;
-		if(!isNew())
-		{
-			ret = true;
-			RetrieveResult<UserProjectMapping> rs = UserProjectMapping.findByProjectAndUser(getDatabase(), this, user);
-			UserProjectMapping mapping = rs.next();
-			//there should only be one resource record per user/task pair, but just in case...
-			while(mapping != null)
-			{
-				if(!mapping.delete())
-				{
-					ret = false;
-				}
-				mapping = rs.next();
-			}
-		}
-		return ret;
+		setPersistentValue(LAST_UPDATED_DATE, date);		
 	}
-
-	public boolean isUserAssigned(User user)
+	
+	public Date getLastUpdatedDate(Date date)
 	{
-		boolean ret = false;
-		if(!isNew())
-		{
-			if(UserProjectMapping.findByProjectAndUser(getDatabase(), this, user).next() != null)
-			{
-				ret = true;
-			}
-		}
-		return ret;
+		return (Date)getPersistentValue(LAST_UPDATED_DATE);		
 	}
 
 }

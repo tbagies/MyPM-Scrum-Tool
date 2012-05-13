@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import domainModel.Forum;
+import domainModel.Role;
 import domainModel.User;
 
 /**
@@ -34,13 +35,12 @@ public class ReplyToThreadServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		response.setContentType("text/htm;charset=UTF-8");
-		String title = request.getParameter("title").trim();
-		String threadText = request.getParameter("postText").trim();
+		String title = request.getParameter("title");
+		String threadText = request.getParameter("postText");
 		String threadID = request.getParameter("threadID");
 		String userID = request.getParameter("userID");
 		RequestDispatcher dispatcher;
-		String fileName="/error.jsp";
+		String fileName="/replyToThread.jsp?threadID=" + threadID;
 		String msg="";
 		if(title == null || threadText==null || threadText.isEmpty() || threadID == null || userID == null){
 			msg= "All field are required";
@@ -50,7 +50,7 @@ public class ReplyToThreadServlet extends HttpServlet {
 			domainModel.Thread threadObj = domainModel.Thread.findById(myDb, Integer.parseInt(threadID));
 			User userObj = User.findById(myDb, Integer.parseInt(userID));
 			Forum forumObj = threadObj.getForum();
-			if(userObj.isForumAssigned(forumObj)){
+			if(userObj.getProject().getProjectId().equals(forumObj.getProject().getProjectId().intValue()) || userObj.getRole().getAccessLevelId().equals(Role.INSTRUCTOR)){
 				domainModel.Post postObj= new domainModel.Post(myDb);
 				java.util.Date today = new java.util.Date();
 				long t = today.getTime();
@@ -60,11 +60,11 @@ public class ReplyToThreadServlet extends HttpServlet {
 				postObj.setTitle(title);
 				postObj.setUser(userObj);
 				postObj.setThread(threadObj);
-				if(postObj.persist())
-					fileName = "/showThread.jsp?threadID=" + threadID;
+				if(!postObj.persist())
+					msg = "your post has not been added into database";
 			}
 			else
-				msg= "Not allowed";
+				msg= "you are not allowed to post in this forum";
 		}
 		request.setAttribute("msg", msg);
 		dispatcher = getServletContext().getRequestDispatcher(fileName);
@@ -75,7 +75,7 @@ public class ReplyToThreadServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		doGet(request,response);
 	}
 
 }

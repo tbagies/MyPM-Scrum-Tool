@@ -5,7 +5,7 @@
 <head>
 <link rel="stylesheet" href="pageElements/scrumpm.css" type="text/css"></link>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Show Forum</title>
+<title>Collaboration Tool-Threads</title>
 </head>
 <body>
  <%@ include file="pageElements/UserSession.jsp"%>
@@ -16,23 +16,24 @@
 <table>
 <tr><td><%@ include file="pageElements/LeftMenuFile.jsp"%>
 <td>
-
-<%if(request.getAttribute("msg")!=null)
-	out.print("<h2>" + request.getAttribute("msg") + "</h2>");%>
 <% 
+if(request.getParameter("threadID")==null)
+	out.print("<h2>you have to choose a thread</h2>");
+if(request.getAttribute("msg") != null)
+		out.print("<h2>" + request.getAttribute("msg") + "</h2>");
 if(request.getAttribute("isEmpty") != null){
 %>
 <table>
 <tr><td> 
-<form action="PostThreadServlet" method="post">
-<input type="hidden" name="forumID" value=<%=request.getParameter("forumID") %>>
+<form action="ReplyToThreadServlet" method="post">
+<input type="hidden" name="threadID" value=<%=request.getParameter("threadID") %>>
 <input type="hidden" name="userID" value=<%=session.getAttribute("userID") %>>
 	
 	<tr><td>
 Title:
 <td><input type="Text" name="title">
 <tr><td colspan=2>
-<textarea name="threadText" rows="10" cols="35"></textarea>
+<textarea name="postText" rows="10" cols="35"></textarea>
 <tr><td colspan=2 align=center>
 <input type="submit" value="post">
 <input type="reset" value="reset">
@@ -40,7 +41,7 @@ Title:
 </table>
 <% 
 	if(request.getAttribute("isEmpty") == "true")
-		out.print("<h2>No Threads</h2>");
+		out.println("No posts");
 	else{
 		out.println(request.getAttribute("records"));
 	}
@@ -48,13 +49,13 @@ Title:
 else
 {
 	if(!redirect){
-		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/ShowForumServlet");
+		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/ShowThreadServlet");
 		requestDispatcher.include(request, response);
 	}
 }
 %>
-
-<tr><td colspan=2>
+</center>
+<tr><td>
 <%@ include file="pageElements/FooterFile.html"%>
 </table>
 </body>

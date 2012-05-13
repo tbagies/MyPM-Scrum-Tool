@@ -31,38 +31,36 @@ public class ShowThreadServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.setContentType("text/html;charset=UTF-8");
-		String fileName; 
+		
 		String threadID = request.getParameter("threadID");
+		String fileName = "/replyToThread.jsp?threadID=" + threadID; 
+		String msg="";
 		if(threadID != null){
-			fileName = "/showThread.jsp?threadID=" + threadID;
 			domainModel.Thread threadObj = domainModel.Thread.findById(myDb, Integer.parseInt(threadID));
 			pmPersistence.RetrieveResult<domainModel.Post> postResult = domainModel.Post.findByThread(myDb, threadObj);
 			domainModel.Post postObj = postResult.next();
 			StringBuilder posts = new StringBuilder("");
 			posts.append("<table>");
-		//	posts.append("<tr>");
-		//	posts.append("<td>" + threadObj.getTitle());
-		//	posts.append("<td>" + threadObj.getText());
-		///	posts.append("<td>" + threadObj.getDate());
-		//	posts.append("<td>" + threadObj.getUser().getUserName());
+			posts.append("<tr>");
+			posts.append("<td colspan=2>" + threadObj.getTitle());
+			posts.append("<tr><td colspan=2>" + threadObj.getText());
+			posts.append("<tr><td align=left>" + threadObj.getUser().getUserName());
+			posts.append("<td align=right>" + threadObj.getDate());
 			if(postObj!=null){
 				while(postObj != null){		
 					posts.append("<tr><td colspan=2>");
-					posts.append("<h2>" + postObj.getTitle() + "</h2>");
-					posts.append("<tr ><td colspan=2><p>" + postObj.getText() + "</p>");
-					posts.append("<tr><td><h3>" + "Created by" + postObj.getUser().getUserName() + "<td>" + postObj.getDate() + "</h3>");
+					posts.append(postObj.getTitle());
+					posts.append("<tr ><td colspan=2>" + postObj.getText());
+					posts.append("<tr><td>" + postObj.getUser().getUserName() + "<td>" + postObj.getDate());
 					postObj = postResult.next();
 				}
-				
 			}
 			request.setAttribute("isEmpty", "false");
 			posts.append("</table>");
 			request.setAttribute("records",posts.toString());
 		}
 		else
-			fileName = "/error.jsp";
+			msg ="You have to select a thread first";
 		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher(fileName);
 		requestDispatcher.forward(request, response);
 	}
@@ -71,7 +69,7 @@ public class ShowThreadServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		doGet(request,response);
 	}
 
 }

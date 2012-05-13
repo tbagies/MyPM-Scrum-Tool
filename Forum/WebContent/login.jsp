@@ -26,7 +26,7 @@ if(userSession==null){
 	else
 		out.println(request.getAttribute("msg"));
 	%>
-	<form action="LoginServlet" method="get">
+	<form action="LoginServlet" method="post">
 	<tr><td>
 User Name:
 <td><input type="text" name="userName">

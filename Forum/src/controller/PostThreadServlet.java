@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import domainModel.Forum;
+import domainModel.Role;
 import domainModel.User;
 
 /**
@@ -33,22 +34,21 @@ public class PostThreadServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.setContentType("text/htm;charset=UTF-8");
 		String title = request.getParameter("title").trim();
 		String threadText = request.getParameter("threadText").trim();
 		String forumID = request.getParameter("forumID");
 		String userID = request.getParameter("userID");
 		RequestDispatcher dispatcher;
-		String fileName="/error.jsp";
+		String fileName="/showForum.jsp?forumID=" + forumID;
+		String msg="";
 		if(title == null || threadText==null || threadText.isEmpty() || forumID == null || userID == null){
-			fileName= fileName + "?msg=All Fields are required";
+			msg="All Fields are required";
 		}
 		else{
 			// insert the record in database
 			Forum forumObj = Forum.findById(myDb, Integer.parseInt(forumID));
 			User userObj = User.findById(myDb, Integer.parseInt(userID));
-			if(userObj.isForumAssigned(forumObj)){
+			if((userObj.getProject().getProjectId().equals(forumObj.getProject().getProjectId())) || (userObj.getRole().getAccessLevelId().equals(Role.INSTRUCTOR))){
 				domainModel.Thread threadObj= new domainModel.Thread(myDb);
 				java.util.Date today = new java.util.Date();
 				long t = today.getTime();
@@ -58,13 +58,13 @@ public class PostThreadServlet extends HttpServlet {
 				threadObj.setTitle(title);
 				threadObj.setUser(userObj);
 				threadObj.setForum(forumObj);
-				if(threadObj.persist())
-					fileName ="/showForum.jsp?forumID=" + forumID;
+				if(!threadObj.persist())
+					msg= "The post has not been added to database";
 			}
 			else
-				fileName= fileName + "?msg=not allowed";
-
+				msg="You are not allowed to post a thread in this forum" + userObj.getUserName() + " " + userObj.getRole().getDescription();
 		}
+		request.setAttribute("msg", msg);
 		dispatcher = getServletContext().getRequestDispatcher(fileName);
         dispatcher.forward(request, response);
 	}

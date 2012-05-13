@@ -14,6 +14,10 @@ public final class Task  extends PersistentObject {
 	private static final String START_DATE = "StartDate";
 	private static final String END_DATE = "EndDate";
 	private static final String PROJECT_ID = "ProjectID";
+	private static final String STATUS = "status";
+	private static final String CREATED_BY = "TaskCreatedby";
+	private static final String LAST_UPDATED_DATE = "LastUpdatedDate";
+	private static final String CREATED_DATE = "TaskCreatedDate";
 	
 	public static RetrieveResult<Task> getAll(Database db)
 	{
@@ -167,5 +171,53 @@ public final class Task  extends PersistentObject {
 			}
 		}
 		return ret;
+	}
+	
+	public TaskComment createComment(User author)
+	{
+		TaskComment ret = new TaskComment(getDatabase());
+		ret.setUser(author);
+		ret.setTask(this);
+		return ret;
+	}
+	
+	public void setStatus(String status)
+	{
+		setPersistentValue(STATUS, status);	
+	}
+	
+	public String getStatus()
+	{
+		return (String)getPersistentValue(STATUS);
+	}
+	
+	public void setCreator(User creator)
+	{
+		setPersistentValue(CREATED_BY, creator.getUserId());
+	}
+	
+	public User getCreator()
+	{
+		return User.findById(getDatabase(), (Integer)getPersistentValue(CREATED_BY));
+	}
+	
+	public void setLastUpdatedDate(Date date)
+	{
+		setPersistentValue(LAST_UPDATED_DATE, date);
+	}
+	
+	public Date getLastUpdatedDate()
+	{
+		return (Date)getPersistentValue(LAST_UPDATED_DATE);
+	}
+	
+	public void setCreatedDate(Date date)
+	{
+		setPersistentValue(CREATED_DATE, date);
+	}
+	
+	public Date getCreatedDate()
+	{
+		return (Date)getPersistentValue(CREATED_DATE);
 	}
 }

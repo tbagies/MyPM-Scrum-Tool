@@ -1,5 +1,7 @@
 package domainModel;
 
+import java.sql.Date;
+
 import pmPersistence.Database;
 import pmPersistence.PersistentObject;
 import pmPersistence.RetrieveResult;
@@ -14,6 +16,7 @@ public final class UserProfile extends PersistentObject {
 	static private final String USER_ID="UserID";
 	static private final String ALT_EMAIL="AlternativeEmail";
 	static private final String TELEPHONE="Telphone";
+	static private final String LAST_UPDATED_DATE = "LastUpdatedDate";
 	
 	public static RetrieveResult<UserProfile> getAll(Database db)
 	{
@@ -103,5 +106,15 @@ public final class UserProfile extends PersistentObject {
 	public String getTelephone()
 	{
 		return (String)getPersistentValue(TELEPHONE);
+	}
+	
+	public void setLastUpdatedDate(Date date)
+	{
+		setPersistentValue(LAST_UPDATED_DATE, date);
+	}
+	
+	public Date getLastUpdatedDate()
+	{
+		return (Date)getPersistentValue(LAST_UPDATED_DATE);
 	}
 }

@@ -8,9 +8,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import pmPersistence.RetrieveResult;
-
 import domainModel.Forum;
 
 /**
@@ -33,48 +30,20 @@ public class DeleteForumServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		RequestDispatcher dispatcher;
 		String forumID = request.getParameter("forumID");
+		String fileName = "/showAllForums.jsp";
+		String msg="";
 		if(forumID!=null){
 			Forum forumObj = Forum.findById(myDb, Integer.parseInt(forumID));
-			RetrieveResult<domainModel.Thread> threadResult= forumObj.getThreads();
-			domainModel.Thread threadObj = threadResult.next();
-			boolean isDeleted = true;
-			while(threadObj!=null){
-				RetrieveResult<domainModel.Post> postResult = threadObj.getPosts();
-				domainModel.Post postObj = postResult.next();
-				while(postObj!=null){
-					if(!postObj.delete()){
-						isDeleted=false;
-						break;
-					}
-					postObj = postResult.next();
-				}
-				if(isDeleted){
-					if(!threadObj.delete()){
-						isDeleted=false;
-						break;
-					}
-				}
-				threadObj = threadResult.next();
-			}
-			if(isDeleted){
-				if(forumObj.delete()){
-					request.setAttribute("isDeleted","true");
-				}
-				else
-					request.setAttribute("isDeleted","false");
-			}
-			else
-				request.setAttribute("isDeleted","false");
-			dispatcher = getServletContext().getRequestDispatcher("/deleteForum.jsp?forumID=" + forumID);
+			if(!forumObj.delete())
+				msg ="The forum has not been deleted";
 		}
 		else
-			dispatcher = getServletContext().getRequestDispatcher("/error.jsp");
-
-    dispatcher.forward(request, response);
-    
+			msg = "you have to select a forum";
+		request.setAttribute("msg", msg);	
+		dispatcher = getServletContext().getRequestDispatcher(fileName);
+		dispatcher.forward(request, response);
 	}
 
 	/**
@@ -82,6 +51,7 @@ public class DeleteForumServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		doGet(request,response);
 	}
 
 }

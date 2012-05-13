@@ -1,11 +1,12 @@
 /* PM Scrum Tool CSS
 Change Log
 0.1 Initial release: Green theme. Still not sure if all the required elements are represented yet...
+0.2 Changed to blue
 */
 
 body
 {
-	background-color:#eeeeee;
+	background-color:#8cb1c3;
 }
 
 table
@@ -20,25 +21,26 @@ table
 caption 
 {
 	caption-side:bottom;
-	color:#629852;
+	color:#094961;
+	text-shadow:0.1em 0.1em 0.2em white;
 }
 
 th
 {
 	border: 1px solid black;
-	background-color:#93E87D;
+	background-color:#6e8692;
 }
 
 tr
 {
 	border: 1px solid black;
-	background-color:#9AE69D;
+	background-color:#8cb1c3;
 }
 
 tr:nth-child(even)
 {
 	border: 1px solid black;
-	background-color:#9FEDAF;
+	background-color:#387997;
 }
 
 td
@@ -49,19 +51,19 @@ td
 h1
 {
 	text-transform:uppercase;
-	background-color:A2F761;
-	color:#555555;
+    color:#0087c1;
 	margin-left:5%;
 	margin-right:5%;
+	text-shadow:0.1em 0.1em 0.2em white;
 }
 
 h2,h3,h4,h5,h6
 {
 	text-transform:capitalize;
-	background-color:A2F761;
-	color:#555555;
+	color:#0087c1;
 	margin-left:5%;
 	margin-right:5%;
+	text-shadow:0.1em 0.1em 0.2em white;
 }
 
 
@@ -69,7 +71,7 @@ p
 {
 	margin-left:5%;
 	margin-right:5%;
-	background-color:#9FEDAF;
+	background-color:#387997;
 }
 
 div
@@ -83,10 +85,8 @@ br
 
 form
 {
-	/*color:#ffff00;*/
 	margin-left:5%;
 	margin-right:5%;
-	background-color:#9AE69D;
 }
 
 label
@@ -112,14 +112,15 @@ a:link,a:visited
 {
 	display:block;
 	font-weight:bold;
-	color:#770055;
-	background-color:#93E87D;
+	/*color:#770055;
+	background-color:#93E87D; */
 	margin-left:5%;
 	margin-right:5%;
 }
 
 a:hover,a:active
 {
-	background-color:#92F05D;
+	/*
+	background-color:#92F05D; */
 }
 

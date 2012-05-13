@@ -6,7 +6,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 
-public class RetrieveResult<T extends PersistentObject> {
+public class RetrieveResult<T extends PersistentObject>{
 
 	private Class<T> myClass;
 	private ResultSet myResultSet;
